@@ -17,7 +17,7 @@ flowchart LR
         direction TB
 
         SENSOR["카메라·센서"]
-        DCPU["드론 내장 CPU<br/>센서 수집·영상 전처리<br/>통신·임무 실행"]
+        DCPU["드론 내장 CPU<br/>수집·임무 실행"]
         FC["비행 제어기<br/>비행·안전 동작"]
 
         SENSOR --> DCPU
@@ -28,7 +28,7 @@ flowchart LR
         direction TB
 
         DOCK["차량 천장 드론 적재·이착륙 거점"]
-        ORIN["차량 내장 Jetson Orin<br/>현장 Gateway·엣지 AI<br/>드론 명령·정보 집계"]
+        ORIN["차량 내장 Jetson Orin<br/>현장 Gateway·경량 OnDevice AI 객체탐지<br/>드론 명령·정보 집계"]
         CARCTRL["차량 제어·위치·LiDAR<br/>주행·안전 정지"]
 
         DOCK --- ORIN
@@ -38,12 +38,10 @@ flowchart LR
     subgraph CENTER["GPU 통합 관제 서버"]
         direction TB
 
-        INGEST["MQTT 현장 연결부<br/>통합 메트릭·명령·ACK"]
         SERVER["관제 Backend · Java/Spring Boot<br/>임무·장비·권한·안전·이벤트"]
         DB["MySQL·영상 저장소<br/>임무·상태·이벤트·명령·로그"]
         REALTIME["실시간 배포<br/>WebSocket"]
 
-        INGEST <--> SERVER
         SERVER <--> DB
         SERVER --> REALTIME
     end
@@ -55,19 +53,15 @@ flowchart LR
         UI <--> OP
     end
 
-    subgraph MOCK["2순위 · 다중 관제 검증"]
-        MOCKDATA["Mock 데이터 생성기<br/>복수 차량·드론 쌍<br/>상태·영상 참조·이벤트"]
-    end
 
-    subgraph AIEXP["확장 · 관제 시스템 AI 서버"]
-        AISERVER["독립 GPU AI 서버<br/>모델 서빙·고부하 추론<br/>재검증·예측·경로 분석"]
+    subgraph AIEXP["확장 · 독립 AI 서버"]
+        AISERVER["독립 GPU AI 서버<br/>심화 객체 탐지<br/>재검증·예측·경로 분석"]
     end
 
     DCPU <-->|"MQTT · 불안정 네트워크 대응<br/>드론 정보·명령·ACK"| ORIN
-    ORIN <-->|"MQTT<br/>통합 메트릭·Orin AI 결과·명령·ACK"| INGEST
+    ORIN <-->|"MQTT<br/>통합 메트릭·Orin AI 결과·명령·ACK"| SERVER
     REALTIME -->|"WebSocket<br/>실시간 상태·경보·명령 결과"| UI
     UI <-->|"HTTP/JSON<br/>조회·최종 판단·명령"| SERVER
-    MOCKDATA -.->|"실장비와 동일한 공통 메시지"| INGEST
     SERVER <-.->|"추론 요청·결과<br/>직접 장비 제어 금지"| AISERVER
 ```
 
@@ -157,11 +151,12 @@ sequenceDiagram
 | 연결 구간 | 규격 | 전송 내용 | 결정 상태 |
 |---|---|---|---|
 | 드론 내장 CPU ↔ OrinCar의 Jetson Orin Gateway | MQTT | 드론 텔레메트리·센서·위치·상태, 차량이 전달하는 임무·명령, 구간별 ACK | 변경 규격 반영. 불안정한 현장 네트워크의 재연결·QoS를 고려 |
-| OrinCar의 Jetson Orin Gateway ↔ GPU 관제 서버 | MQTT | 차량·드론 통합 메트릭, Orin AI 결과, 서버 명령, 통합 ACK | 변경 규격 반영 |
+| OrinCar의 Jetson Orin Gateway ↔ 관제 서버 | MQTT | 차량·드론 통합 메트릭, Orin AI 결과, 서버 명령, 통합 ACK | 변경 규격 반영 |
 | 웹 관제 UI ↔ 관제 서버 | HTTP/JSON | 조회·신고·임무 생성·최종 판단·명령과 동기 응답 | 변경 규격 반영 |
 | 관제 서버 → 웹 관제 UI | WebSocket | 실시간 상태·경보·AI 결과·임무 진행·명령 결과 | 변경 규격 반영 |
 
-사용자가 제시한 `드론 → OrinCar`, `OrinCar → 서버` 표기는 데이터의 주된 상행 흐름이다. 기능명세서에는 서버 명령과 구간별 ACK가 있으므로 실제 인터페이스는 두 구간 모두 **양방향 MQTT**로 정의한다. 드론은 관제 서버와 직접 연결하지 않는다.
+ `드론 → OrinCar`, `OrinCar → 서버` 표기는 데이터의 주된 상행 흐름이다. 기능명세서에는 서버 명령과 구간별 ACK가 있으므로 실제 인터페이스는 두 구간 모두 **양방향 MQTT**로 정의한다. 드론은 관제 서버와 직접 연결하지 않는다.
+ `드론 → OrinCar`의 규격 MQTT는 드론 모델이 변경될 경우 제공되는 규격에 맞춰 변경될 수 있다.
 
 ### 3.2 내부 연결·확장·미확정 항목
 
@@ -173,7 +168,6 @@ sequenceDiagram
 | Mock 데이터 생성기 → 관제 서버 | 실장비와 동일한 차량 Gateway MQTT 계약 사용 | 2순위 다중 관제 시험 |
 | 관제 Backend ↔ 독립 AI 서버 | 장비 직접 제어가 불가능한 별도 추론 계약 | MVP 이후 확장 시 프로토콜 확정 |
 
-`OBS-002`는 드론 영상이 차량을 거쳐 관제 화면까지 전달될 것을 요구하지만, 변경 통신 규격에는 영상 payload·참조·스트리밍 방식이 확정되어 있지 않다. 따라서 MQTT가 영상 원본까지 운반하는지, MQTT에는 영상 참조만 싣고 별도 스트림을 둘지는 인터페이스 기준선 전에 결정해야 한다. 결정 전에는 WebSocket Binary·RTSP 등을 공식 규격으로 간주하지 않는다.
 
 물리 네트워크는 Wi-Fi·LTE/5G 등 현장 조건에 따라 별도 확정한다. 물리망과 관계없이 논리 통신 경로는 `드론 ↔ OrinCar Jetson Orin ↔ 관제 서버`를 유지한다.
 
@@ -225,8 +219,8 @@ sequenceDiagram
 1. 드론 내장 CPU와 비행 제어기의 기종·SDK·내부 연결 규격
 2. 두 MQTT 구간의 broker 배치, topic, QoS, retained message, session, keep-alive, 재연결·재전송과 인증 정책
 3. 차량 천장 드론 적재·고정·이착륙·회수·충전 방식과 안전 조건
-4. Jetson Orin에서 자동 실행할 AI 모델, 신뢰도 임계값과 허용 명령 범위
-5. MVP Jetson Orin AI와 확장 독립 AI 서버 사이의 모델·추론 책임 분리
+4. Jetson Orin에서 자동 실행할 AI 모델의 신뢰도 임계값과 허용 명령 범위
+5. 확장 독립 AI 서버 모델의 신뢰도 임계값
 6. 최근접 차량 선정 기준(거리, 통신 상태, 배터리, 탑재 드론 가용성, 도로 접근성)
 7. 실시간 정보의 갱신 주기, 영상 지연·화질, 저장 범위와 보관 기간
 8. Mock 다중 관제의 목표 차량·드론 수, 데이터 생성 주기와 부하 기준
