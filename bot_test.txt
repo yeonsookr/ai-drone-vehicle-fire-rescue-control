@@ -1,0 +1,1 @@
+공통 PJT - A302팀 GitLab-MatterMost 연동 Bot 테스트입니다.
