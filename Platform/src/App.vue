@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import Sidebar from '@/components/Sidebar.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <div class="flex h-screen bg-[#0f0f0f] text-gray-200">
+    <Sidebar />
+    <main class="flex-1 overflow-auto">
+      <router-view />
+    </main>
+  </div>
 </template>
