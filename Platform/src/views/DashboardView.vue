@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useKakaoMap } from '@/composables/useKakaoMap'
 import { useTelemetryStore } from '@/stores/telemetry'
 import type { DroneTelemetry } from '@/types'
-import { Plus, Minus, Map as MapIcon, Satellite, Crosshair } from '@lucide/vue'
+import { Plus, Minus, Map as MapIcon, Satellite, Crosshair, Plane, Camera, TriangleAlert } from '@lucide/vue'
 
 const telemetry = useTelemetryStore()
 
 const mapReady = ref(false)
 const mapError = ref('')
 const mapContainer = ref<HTMLElement | null>(null)
-const mapType = ref(2) // 1=ROADMAP, 2=SKYVIEW
+const mapType = ref(2)
 const currentLevel = ref(8)
 
 let kakaoMap: kakao.maps.Map | null = null
 const markers = new Map<string, kakao.maps.Marker>()
+
+const activeDrones = computed(() => telemetry.droneIds.length)
+const activeGateways = computed(() => telemetry.connected ? 1 : 0)
+const streaming = computed(() => activeDrones.value)
 
 function syncMarkers(map: Map<string, DroneTelemetry>) {
   if (!kakaoMap || !mapReady.value) return
@@ -106,8 +110,39 @@ onUnmounted(() => {
       </span>
     </header>
 
+    <!-- Stats Bar -->
+    <section class="h-16 flex items-center gap-4 px-6 border-b border-gray-800 shrink-0">
+      <div class="flex items-center gap-3 flex-1 h-10 bg-gray-800 rounded-lg px-4">
+        <Plane class="w-5 h-5 text-gray-400 shrink-0" />
+        <div>
+          <div class="text-[11px] text-gray-500 leading-tight">Active Drones</div>
+          <div class="text-base font-bold text-gray-100 leading-tight">{{ activeDrones }}</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-1 h-10 bg-gray-800 rounded-lg px-4">
+        <Satellite class="w-5 h-5 text-gray-400 shrink-0" />
+        <div>
+          <div class="text-[11px] text-gray-500 leading-tight">Gateways</div>
+          <div class="text-base font-bold text-gray-100 leading-tight">{{ activeGateways }}</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-1 h-10 bg-gray-800 rounded-lg px-4">
+        <Camera class="w-5 h-5 text-gray-400 shrink-0" />
+        <div>
+          <div class="text-[11px] text-gray-500 leading-tight">Streaming</div>
+          <div class="text-base font-bold text-gray-100 leading-tight">{{ streaming }}</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-1 h-10 bg-gray-800 rounded-lg px-4">
+        <TriangleAlert class="w-5 h-5 text-gray-400 shrink-0" />
+        <div>
+          <div class="text-[11px] text-gray-500 leading-tight">Alerts</div>
+          <div class="text-base font-bold text-gray-100 leading-tight">0</div>
+        </div>
+      </div>
+    </section>
+
     <section class="flex-1 flex gap-4 p-4 min-h-0">
-      <!-- Left: Map (50%) -->
       <div ref="mapContainer" class="flex-1 bg-gray-800 rounded-lg border border-gray-700 relative overflow-hidden">
         <div v-if="mapError" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm bg-gray-800/80 z-20">
           {{ mapError }}
@@ -116,7 +151,6 @@ onUnmounted(() => {
           Loading map...
         </div>
 
-        <!-- Map controls (top-right) -->
         <div v-if="mapReady" class="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
           <button
             @click="toggleMapType"
@@ -135,7 +169,6 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <!-- Zoom controls (bottom-right) -->
         <div v-if="mapReady" class="absolute bottom-3 right-3 z-10 flex flex-col gap-px rounded-lg overflow-hidden shadow-lg">
           <button
             @click="zoomIn"
@@ -154,7 +187,6 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Right: placeholder (50%) -->
       <div class="flex-1 flex flex-col gap-4 min-h-0">
         <div class="flex-1 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center text-gray-600 text-sm">
           Camera grid (next)
