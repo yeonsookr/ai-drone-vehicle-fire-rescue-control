@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: IoTServer
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/drone_control?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+mqtt:
+  broker-url: tcp://localhost:1883
+  client-id: drone-control-server
