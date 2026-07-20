@@ -5,8 +5,8 @@ import Sidebar from '@/components/Sidebar.vue'
 <template>
   <div class="flex h-screen bg-[#0f0f0f] text-gray-200">
     <Sidebar />
-    <main class="flex-1 overflow-auto">
-      <router-view />
+    <main class="flex-1 overflow-auto flex flex-col min-h-0">
+      <router-view class="flex-1 min-h-0" />
     </main>
   </div>
 </template>
