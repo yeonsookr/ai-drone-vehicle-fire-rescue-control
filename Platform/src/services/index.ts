@@ -1,3 +1,3 @@
-export { startTelemetry, stopTelemetry } from './telemetryService'
-export { fetchDetections, judgeDetection, selectDetection } from './detectionService'
-export { fetchDrones, fetchGateways } from './deviceService'
+export { useTelemetryService } from './telemetryService'
+export { useDetectionService } from './detectionService'
+export { useDeviceService } from './deviceService'
