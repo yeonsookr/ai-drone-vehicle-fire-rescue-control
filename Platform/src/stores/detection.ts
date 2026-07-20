@@ -33,7 +33,7 @@ export const useDetectionStore = defineStore('detection', () => {
   }
 
   async function judge(id: string, judgment: OperatorJudgment, reason?: string) {
-    const { data } = await detectionApi.judge(id, judgment, reason)
+    const { data } = await detectionApi.judge(id, { judgment, reason })
     const idx = events.value.findIndex((e) => e.id === id)
     if (idx !== -1) events.value[idx] = data
     return data
