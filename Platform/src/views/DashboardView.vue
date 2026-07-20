@@ -41,8 +41,7 @@ onMounted(async () => {
   telemetry.start()
 })
 
-// React to store updates — reassigns the ref on each push
-watch(telemetry.latest, syncMarkers, { deep: false })
+watch(() => telemetry.version, () => syncMarkers(telemetry.latest))
 
 onUnmounted(() => {
   telemetry.stop()

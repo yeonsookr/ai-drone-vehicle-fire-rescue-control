@@ -11,6 +11,7 @@ export const useTelemetryStore = defineStore('telemetry', () => {
   const connected = ref(false)
 
   const droneIds = computed(() => [...latest.value.keys()])
+  const version = ref(0)
 
   let unsubscribe: (() => void) | null = null
 
@@ -24,6 +25,7 @@ export const useTelemetryStore = defineStore('telemetry', () => {
 
   function push(entry: DroneTelemetry) {
     latest.value = new Map(latest.value).set(entry.drone_id, entry)
+    version.value++
     connected.value = true
 
     const h = history.value.get(entry.drone_id) ?? []
@@ -43,7 +45,7 @@ export const useTelemetryStore = defineStore('telemetry', () => {
   }
 
   return {
-    latest, history, connected, droneIds,
+    latest, history, connected, droneIds, version,
     latestOf, historyOf, push,
     start, stop,
   }
