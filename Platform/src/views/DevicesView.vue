@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Plane, Satellite, Search, Plus, X } from '@lucide/vue'
+import { Line } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  CategoryScale, LinearScale, PointElement, LineElement,
+  Title, Tooltip, Filler,
+} from 'chart.js'
 import { useTelemetryStore } from '@/stores/telemetry'
 import { useDeviceStore } from '@/stores/device'
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
 const telemetry = useTelemetryStore()
 const deviceStore = useDeviceStore()
@@ -45,6 +53,39 @@ const selectedItem = computed(() => {
   if (!selectedId.value) return null
   if (activeTab.value === 'drones') return filteredDrones.value.find((d) => d.id === selectedId.value) ?? null
   return filteredGateways.value.find((g) => g.id === selectedId.value) ?? null
+})
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: { duration: 200 },
+  scales: {
+    x: { display: false },
+    y: { display: true, ticks: { color: '#6b7280', font: { size: 9 }, maxTicksLimit: 4 }, grid: { color: '#374151' }, beginAtZero: true },
+  },
+  plugins: { legend: { display: false }, tooltip: { enabled: false } },
+}
+
+const selectedHistory = computed(() => {
+  if (!selectedId.value || activeTab.value !== 'drones') return []
+  return telemetry.historyOf(selectedId.value).slice(-40)
+})
+
+function makeChartData(values: number[], color: string, fillColor: string) {
+  return {
+    labels: values.map(() => ''),
+    datasets: [{ data: values, borderColor: color, backgroundColor: fillColor, borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3 }],
+  }
+}
+
+const chartData = computed(() => {
+  const h = selectedHistory.value
+  return {
+    altitude: makeChartData(h.map(t => t.altitude), '#22d3ee', 'rgba(34,211,238,0.08)'),
+    speed: makeChartData(h.map(t => t.speed), '#34d399', 'rgba(52,211,153,0.08)'),
+    battery: makeChartData(h.map(t => t.battery_level), '#fbbf24', 'rgba(251,191,36,0.08)'),
+    heading: makeChartData(h.map(t => t.yaw), '#f472b6', 'rgba(244,114,182,0.08)'),
+  }
 })
 
 function select(id: string) {
@@ -205,6 +246,22 @@ onUnmounted(() => {
             <div class="flex justify-between"><span class="text-gray-500">Latitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lat.toFixed(6) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Longitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lng.toFixed(6) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Last Seen</span><span class="text-gray-200">{{ (selectedItem as any).updatedAt }}</span></div>
+
+            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Metrics (recent 40s)</div>
+            <div class="grid grid-cols-2 gap-2" style="height: 160px">
+              <div v-for="(item, idx) in [
+                { title: 'Alt', data: chartData.altitude, color: '#22d3ee' },
+                { title: 'Speed', data: chartData.speed, color: '#34d399' },
+                { title: 'Battery', data: chartData.battery, color: '#fbbf24' },
+                { title: 'Heading', data: chartData.heading, color: '#f472b6' },
+              ]" :key="idx" class="bg-gray-900 rounded p-1.5 flex flex-col">
+                <div class="text-[10px] text-gray-500 mb-0.5">{{ item.title }}</div>
+                <div class="flex-1 min-h-0">
+                  <Line v-if="item.data.datasets[0].data.length > 1" :data="item.data as any" :options="chartOptions" />
+                  <div v-else class="flex items-center justify-center h-full text-gray-600 text-[10px]">...</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Transition>
