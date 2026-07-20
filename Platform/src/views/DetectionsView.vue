@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Flame, Wind, Check, Ban, Clock } from '@lucide/vue'
 import { useDetectionStore } from '@/stores/detection'
+import { fetchDetections, judgeDetection } from '@/services/detectionService'
 
 const detection = useDetectionStore()
 
@@ -43,11 +44,11 @@ function select(id: string) {
 
 async function handleJudge(judgment: 'approved' | 'false_alarm' | 'pending') {
   if (!selectedId.value) return
-  await detection.judge(selectedId.value, judgment)
+  await judgeDetection(selectedId.value, judgment)
 }
 
 onMounted(() => {
-  detection.fetch()
+  fetchDetections()
 })
 </script>
 

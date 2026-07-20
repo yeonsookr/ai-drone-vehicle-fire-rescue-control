@@ -2,6 +2,7 @@
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useKakaoMap } from '@/composables/useKakaoMap'
 import { useTelemetryStore } from '@/stores/telemetry'
+import { startTelemetry, stopTelemetry } from '@/services/telemetryService'
 import type { DroneTelemetry } from '@/types'
 import { Plus, Minus, Map as MapIcon, Satellite, Crosshair, Plane, Camera, TriangleAlert } from '@lucide/vue'
 
@@ -86,13 +87,13 @@ onMounted(async () => {
     }
   }
 
-  telemetry.start()
+  startTelemetry()
 })
 
 watch(() => telemetry.version, () => syncMarkers(telemetry.latest))
 
 onUnmounted(() => {
-  telemetry.stop()
+  stopTelemetry()
   for (const m of markers.values()) m.setMap(null)
   markers.clear()
 })

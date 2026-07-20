@@ -9,6 +9,8 @@ import {
 } from 'chart.js'
 import { useTelemetryStore } from '@/stores/telemetry'
 import { useDeviceStore } from '@/stores/device'
+import { startTelemetry, stopTelemetry } from '@/services/telemetryService'
+import { fetchGateways } from '@/services/deviceService'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -107,12 +109,12 @@ function batteryColor(battery: number) {
 }
 
 onMounted(() => {
-  telemetry.start()
-  deviceStore.fetchGateways()
+  startTelemetry()
+  fetchGateways()
 })
 
 onUnmounted(() => {
-  telemetry.stop()
+  stopTelemetry()
 })
 </script>
 
