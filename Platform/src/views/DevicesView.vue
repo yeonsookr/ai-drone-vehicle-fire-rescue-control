@@ -72,7 +72,7 @@ onUnmounted(() => { telemetry.stop() })
     <div class="h-14 flex items-center justify-between px-6 border-b border-gray-800 shrink-0">
       <h1 class="text-base font-bold text-gray-100">Devices</h1>
       <div class="flex items-center gap-3">
-        <span class="text-xs px-2 py-0.5 rounded-full" :class="device.isConnected ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'">{{ device.isConnected ? '● Live' : '○ Offline' }}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full" :class="device.connected ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'">{{ device.connected ? '● Live' : '○ Offline' }}</span>
         <button class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs text-gray-400 transition-colors"><Plus class="w-3.5 h-3.5" /> Add Device</button>
       </div>
     </div>
