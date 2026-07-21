@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Plane, Satellite, Search, Plus, X } from '@lucide/vue'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
 import { useTelemetryService } from '@/services/telemetryService'
 import { useDeviceService } from '@/services/deviceService'
 import { fmtCoord, fmtTime, fmtBattery } from '@/lib/format'
+import { commandApi } from '@/lib/api/commands'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -63,6 +64,35 @@ function select(id: string) { selectedId.value = selectedId.value === id ? null 
 function statusLabel(s: string) { return { FLYING: 'Flying', LANDING: 'Landing', IDLE: 'Idle', CHARGING: 'Charging', OFFLINE: 'Offline' }[s] ?? s }
 function statusColor(s: string) { return { FLYING: 'text-green-400', LANDING: 'text-yellow-400', IDLE: 'text-gray-400', CHARGING: 'text-cyan-400', OFFLINE: 'text-red-400' }[s] ?? 'text-gray-400' }
 function batteryColor(b: number) { return b > 60 ? 'text-green-400' : b > 30 ? 'text-yellow-400' : 'text-red-400' }
+
+const commands = ref<any[]>([])
+const commandsLoading = ref(false)
+
+async function loadCommands() {
+  const id = selectedId.value
+  if (!id) return
+  commandsLoading.value = true
+  try {
+    const { data } = await commandApi.list()
+    commands.value = data
+      .filter((c: any) => c.target_id === id || c.target_id.startsWith(id.slice(0, 5)))
+      .slice(0, 6)
+  } finally { commandsLoading.value = false }
+}
+
+watch(selectedId, () => { if (selectedId.value) loadCommands() })
+
+function cmdChain(cmd: any) {
+  if (cmd.parent_command_id) {
+    const parent = commands.value.find((c: any) => c.id === cmd.parent_command_id)
+    return parent ? `Server → ${parent.target_id} → ${cmd.target_id}` : `→ ${cmd.target_id}`
+  }
+  return `Server → ${cmd.target_id}`
+}
+
+function cmdStatusColor(s: string) {
+  return { SUCCEEDED: 'text-green-400', FAILED: 'text-red-400', RUNNING: 'text-yellow-400', ACK: 'text-cyan-400', EXPIRED: 'text-gray-500' }[s] ?? 'text-gray-400'
+}
 
 onMounted(() => { telemetry.start(); device.fetchGateways() })
 onUnmounted(() => { telemetry.stop() })
@@ -125,6 +155,18 @@ onUnmounted(() => { telemetry.stop() })
               <div v-for="(item, idx) in [{ title: 'Alt', data: chartData.altitude, color: '#22d3ee' }, { title: 'Speed', data: chartData.speed, color: '#34d399' }, { title: 'Battery', data: chartData.battery, color: '#fbbf24' }, { title: 'Heading', data: chartData.heading, color: '#f472b6' }]" :key="idx" class="bg-gray-900 rounded p-1.5 flex flex-col">
                 <div class="text-[10px] text-gray-500 mb-0.5">{{ item.title }}</div>
                 <div class="flex-1 min-h-0"><Line v-if="item.data.datasets[0].data.length > 1" :data="item.data as any" :options="chartOptions" /><div v-else class="flex items-center justify-center h-full text-gray-600 text-[10px]">...</div></div>
+              </div>
+            </div>
+            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Recent Commands</div>
+            <div v-if="commandsLoading" class="text-xs text-gray-600">Loading...</div>
+            <div v-else class="space-y-1.5">
+              <div v-for="cmd in commands" :key="cmd.id" class="bg-gray-900 rounded px-2 py-1.5 text-[10px]">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-300 font-mono">{{ cmd.type }}</span>
+                  <span class="font-medium" :class="cmdStatusColor(cmd.status)">{{ cmd.status }}</span>
+                </div>
+                <div class="text-gray-500 mt-0.5">{{ cmdChain(cmd) }}</div>
+                <div class="text-gray-600">{{ fmtTime(cmd.issued_at) }}</div>
               </div>
             </div>
           </div>
