@@ -5,6 +5,7 @@ import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
 import { useTelemetryService } from '@/services/telemetryService'
 import { useDeviceService } from '@/services/deviceService'
+import { fmtCoord, fmtTime, fmtBattery } from '@/lib/format'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -95,9 +96,9 @@ onUnmounted(() => { telemetry.stop() })
             <Plane class="w-5 h-5 text-gray-400 shrink-0" />
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2"><span class="text-sm font-semibold text-gray-100">{{ d.id }}</span><span class="text-xs text-gray-500">{{ d.model }}</span></div>
-              <div class="flex items-center gap-3 mt-1 text-xs text-gray-500"><span>GW {{ d.gateway }}</span><span v-if="d.lat">{{ d.lat.toFixed(4) }}, {{ d.lng.toFixed(4) }}</span></div>
+              <div class="flex items-center gap-3 mt-1 text-xs text-gray-500"><span>GW {{ d.gateway }}</span><span v-if="d.lat">{{ fmtCoord(d.lat, d.lng) }}</span></div>
             </div>
-            <div class="text-right shrink-0"><div class="text-sm font-bold" :class="batteryColor(d.battery)">{{ d.battery.toFixed(0) }}%</div><div class="text-xs" :class="statusColor(d.status)">{{ statusLabel(d.status) }}</div></div>
+            <div class="text-right shrink-0"><div class="text-sm font-bold" :class="batteryColor(d.battery)">{{ fmtBattery(d.battery) }}</div><div class="text-xs" :class="statusColor(d.status)">{{ statusLabel(d.status) }}</div></div>
           </div>
         </div>
         <div v-else class="space-y-2">
@@ -114,11 +115,11 @@ onUnmounted(() => { telemetry.stop() })
           <div class="flex-1 px-5 py-4 text-xs space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Model</span><span class="text-gray-200">{{ (selectedItem as any).model }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Gateway</span><span class="text-gray-200">{{ (selectedItem as any).gateway }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Battery</span><span class="text-gray-200" :class="batteryColor((selectedItem as any).battery)">{{ (selectedItem as any).battery.toFixed(0) }}%</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Battery</span><span class="text-gray-200" :class="batteryColor((selectedItem as any).battery)">{{ fmtBattery((selectedItem as any).battery) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Status</span><span class="text-gray-200" :class="statusColor((selectedItem as any).status)">{{ statusLabel((selectedItem as any).status) }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Latitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lat.toFixed(6) }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Latitude</span><span class="text-gray-200 font-mono">{{ fmtCoord((selectedItem as any).lat, (selectedItem as any).lng) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Longitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lng.toFixed(6) }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Last Seen</span><span class="text-gray-200">{{ (selectedItem as any).updatedAt }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Last Seen</span><span class="text-gray-200">{{ fmtTime((selectedItem as any).updatedAt) }}</span></div>
             <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Metrics (recent 40s)</div>
             <div class="grid grid-cols-2 gap-2" style="height: 160px">
               <div v-for="(item, idx) in [{ title: 'Alt', data: chartData.altitude, color: '#22d3ee' }, { title: 'Speed', data: chartData.speed, color: '#34d399' }, { title: 'Battery', data: chartData.battery, color: '#fbbf24' }, { title: 'Heading', data: chartData.heading, color: '#f472b6' }]" :key="idx" class="bg-gray-900 rounded p-1.5 flex flex-col">
