@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    restart: always
+    env_file:
+      - .env
+      - .secret.env
+    ports:
+      - "18080:8080"
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  mysql_data:
