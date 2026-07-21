@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# MQTT Local Lock directories
+drone-control-server-tcplocalhost1883/
+
