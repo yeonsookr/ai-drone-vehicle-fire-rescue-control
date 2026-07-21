@@ -140,9 +140,9 @@ onUnmounted(() => { telemetry.stop() })
         </div>
       </div>
       <Transition name="slide">
-        <div v-if="selectedItem && activeTab === 'drones'" class="w-80 border-l border-gray-800 overflow-y-auto shrink-0 flex flex-col bg-gray-850">
+        <div v-if="selectedItem && activeTab === 'drones'" class="w-96 border-l border-gray-800 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0"><h3 class="text-sm font-semibold text-gray-100">{{ selectedItem.id }}</h3><button @click="selectedId = null" class="text-gray-500 hover:text-gray-300 transition-colors"><X class="w-4 h-4" /></button></div>
-          <div class="flex-1 px-5 py-4 text-xs space-y-3">
+          <div class="flex-1 px-5 py-4 text-xs overflow-y-auto space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Model</span><span class="text-gray-200">{{ (selectedItem as any).model }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Gateway</span><span class="text-gray-200">{{ (selectedItem as any).gateway }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Battery</span><span class="text-gray-200" :class="batteryColor((selectedItem as any).battery)">{{ fmtBattery((selectedItem as any).battery) }}</span></div>
@@ -151,7 +151,7 @@ onUnmounted(() => { telemetry.stop() })
             <div class="flex justify-between"><span class="text-gray-500">Longitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lng.toFixed(6) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Last Seen</span><span class="text-gray-200">{{ fmtTime((selectedItem as any).updatedAt) }}</span></div>
             <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Metrics (recent 40s)</div>
-            <div class="grid grid-cols-2 gap-2" style="height: 160px">
+            <div class="grid grid-cols-2 grid-rows-2 gap-2" style="min-height: 300px">
               <div v-for="(item, idx) in [{ title: 'Alt', data: chartData.altitude, color: '#22d3ee' }, { title: 'Speed', data: chartData.speed, color: '#34d399' }, { title: 'Battery', data: chartData.battery, color: '#fbbf24' }, { title: 'Heading', data: chartData.heading, color: '#f472b6' }]" :key="idx" class="bg-gray-900 rounded p-1.5 flex flex-col">
                 <div class="text-[10px] text-gray-500 mb-0.5">{{ item.title }}</div>
                 <div class="flex-1 min-h-0"><Line v-if="item.data.datasets[0].data.length > 1" :data="item.data as any" :options="chartOptions" /><div v-else class="flex items-center justify-center h-full text-gray-600 text-[10px]">...</div></div>
@@ -173,7 +173,7 @@ onUnmounted(() => { telemetry.stop() })
         </div>
       </Transition>
       <Transition name="slide">
-        <div v-if="selectedItem && activeTab === 'gateways'" class="w-80 border-l border-gray-800 overflow-y-auto shrink-0 flex flex-col bg-gray-850">
+        <div v-if="selectedItem && activeTab === 'gateways'" class="w-96 border-l border-gray-800 overflow-y-auto shrink-0 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0"><h3 class="text-sm font-semibold text-gray-100">{{ (selectedItem as any).id }}</h3><button @click="selectedId = null" class="text-gray-500 hover:text-gray-300 transition-colors"><X class="w-4 h-4" /></button></div>
           <div class="flex-1 px-5 py-4 text-xs space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Name</span><span class="text-gray-200">{{ (selectedItem as any).name }}</span></div>
