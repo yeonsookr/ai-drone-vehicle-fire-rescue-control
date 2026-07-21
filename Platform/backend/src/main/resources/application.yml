@@ -4,7 +4,11 @@ server:
 spring:
   application:
     name: demo-app
-    
+
+central:
+  api:
+    url: http://localhost:9090
+
   output:
     ansi:
       enabled: always
