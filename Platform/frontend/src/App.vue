@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useTelemetryService } from '@/services/telemetryService'
 import Sidebar from '@/components/Sidebar.vue'
-import DashboardBase from '@/components/DashboardBase.vue'
+import MapPanel from '@/components/MapPanel.vue'
 
 const telemetry = useTelemetryService()
 const connected = computed(() => telemetry.connected)
@@ -11,11 +11,15 @@ const connected = computed(() => telemetry.connected)
 <template>
   <div class="flex h-screen bg-[#0f0f0f] text-gray-200">
     <Sidebar :connected="connected" />
-    <main class="flex-1 flex min-h-0">
-      <div class="w-1/2 flex flex-col min-h-0 border-r border-gray-800">
-        <DashboardBase />
+    <main class="flex-1 relative min-h-0">
+      <!-- Map fills entire main area -->
+      <MapPanel class="absolute inset-0 z-0" />
+      <!-- Page overlays on top of map -->
+      <div class="absolute inset-0 z-10 flex justify-end p-4 pointer-events-none">
+        <div class="w-1/2 flex flex-col pointer-events-auto">
+          <router-view />
+        </div>
       </div>
-      <router-view class="flex-1 flex flex-col min-h-0" />
     </main>
   </div>
 </template>

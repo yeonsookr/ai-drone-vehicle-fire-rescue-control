@@ -31,15 +31,9 @@ function makeGapChartData(items: any[], field: string, color: string, fillColor:
     labels: items.map(() => ''),
     datasets: [{
       data: items.map((t: any) => t[field]),
-      borderColor: color,
-      backgroundColor: fillColor,
+      borderColor: color, backgroundColor: fillColor,
       borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3,
-      segment: {
-        borderColor: (ctx: any) => {
-          const sig = (items[ctx.p1DataIndex] as any)?.signal_strength ?? -60
-          return sig < -85 ? '#ef4444' : color
-        },
-      },
+      segment: { borderColor: (ctx: any) => (items[ctx.p1DataIndex] as any)?.signal_strength < -85 ? '#ef4444' : color },
     }],
   }
 }
@@ -60,21 +54,17 @@ function signalColor(s: number) { return s > -75 ? 'text-green-400' : s > -85 ? 
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col min-h-0">
-    <header class="h-14 flex items-center justify-between px-6 border-b border-gray-800 shrink-0">
-      <h1 class="text-base font-bold text-gray-100">Telemetry</h1>
-      <span v-if="device.disconnectedDevices.length > 0" class="text-xs px-2 py-0.5 rounded-full bg-red-900 text-red-300">! {{ device.disconnectedDevices.length }} disconnected</span>
-    </header>
-    <div class="flex-1 flex flex-col gap-4 p-4 min-h-0 overflow-y-auto">
-      <!-- Equipment cards -->
-      <div v-if="device.equipmentCards.length === 0" class="flex items-center justify-center h-40 text-gray-600 text-xs">Waiting for telemetry...</div>
+  <div class="bg-gray-800/90 backdrop-blur border border-gray-700 rounded-lg flex flex-col min-h-0 overflow-hidden">
+    <div class="h-12 flex items-center justify-between px-4 border-b border-gray-700 shrink-0">
+      <h2 class="text-sm font-semibold text-gray-100">Telemetry</h2>
+      <span v-if="device.disconnectedDevices.length > 0" class="text-[10px] px-2 py-0.5 rounded-full bg-red-900 text-red-300">! {{ device.disconnectedDevices.length }} disconnected</span>
+    </div>
+    <div class="flex-1 overflow-y-auto p-3 space-y-3">
+      <div v-if="device.equipmentCards.length === 0" class="flex items-center justify-center h-20 text-gray-600 text-xs">Waiting for telemetry...</div>
       <div v-else class="grid grid-cols-2 gap-2">
-        <div
-          v-for="card in device.equipmentCards" :key="card.id"
-          @click="selectedDevice = selectedDevice === card.id ? null : card.id"
-          class="bg-gray-800 rounded-lg border px-3 py-2 cursor-pointer transition-colors hover:border-gray-600"
-          :class="[selectedDevice === card.id ? 'border-gray-500' : 'border-gray-700', card.stale ? 'opacity-50' : '']"
-        >
+        <div v-for="card in device.equipmentCards" :key="card.id" @click="selectedDevice = selectedDevice === card.id ? null : card.id"
+          class="bg-gray-900/80 rounded-lg border px-3 py-2 cursor-pointer transition-colors hover:border-gray-600"
+          :class="[selectedDevice === card.id ? 'border-gray-500' : 'border-gray-700', card.stale ? 'opacity-50' : '']">
           <div class="flex items-center gap-2 mb-1.5">
             <Plane v-if="card.type === 'drone'" class="w-3.5 h-3.5" :class="card.stale ? 'text-gray-600' : 'text-cyan-400'" />
             <Satellite v-else class="w-3.5 h-3.5" :class="card.stale ? 'text-gray-600' : 'text-yellow-400'" />
@@ -83,26 +73,23 @@ function signalColor(s: number) { return s > -75 ? 'text-green-400' : s > -85 ? 
             <WifiOff v-else class="w-3 h-3 text-red-400 shrink-0" />
           </div>
           <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
-            <div class="flex justify-between"><span class="text-gray-500">Bat</span><span class="font-medium" :class="batteryColor(card.battery)">{{ card.battery.toFixed(0) }}%</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Bat</span><span :class="batteryColor(card.battery)">{{ card.battery.toFixed(0) }}%</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Alt</span><span class="text-gray-300">{{ card.altitude.toFixed(0) }}m</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Spd</span><span class="text-gray-300">{{ card.speed.toFixed(1) }}m/s</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Sig</span><span class="font-medium" :class="signalColor(card.signal)">{{ card.signal.toFixed(0) }}dBm</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Sig</span><span :class="signalColor(card.signal)">{{ card.signal.toFixed(0) }}dBm</span></div>
           </div>
           <div v-if="card.stale" class="mt-1 text-[9px] text-red-400/80">No data > 4s</div>
           <div v-else-if="card.signal < -85" class="mt-1 text-[9px] text-yellow-400/80">Weak signal</div>
         </div>
       </div>
-
-      <!-- Charts -->
-      <div v-if="selectedDevice" class="bg-gray-800 rounded-lg border border-gray-700 p-3 flex flex-col" style="min-height: 240px">
-        <div class="flex items-center justify-between mb-2 shrink-0">
-          <span class="text-xs font-semibold text-gray-200">{{ selectedDevice }} <span class="text-gray-500 font-normal">({{ selectedHistory.length }} pts)</span></span>
-          <button @click="selectedDevice = null" class="text-gray-500 hover:text-gray-300"><X class="w-4 h-4" /></button>
+      <div v-if="selectedDevice && chartData" class="bg-gray-900/80 rounded-lg border border-gray-700 p-2" style="min-height: 200px">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-semibold text-gray-200">{{ selectedDevice }}</span>
+          <button @click="selectedDevice = null" class="text-gray-500 hover:text-gray-300"><X class="w-3.5 h-3.5" /></button>
         </div>
-        <div v-if="!chartData" class="flex items-center justify-center flex-1 text-gray-600 text-xs">Collecting data...</div>
-        <div v-else class="flex-1 grid grid-cols-2 gap-2 min-h-0">
-          <div v-for="item in [{ t: 'Alt', d: chartData.altitude, c: '#22d3ee' }, { t: 'Speed', d: chartData.speed, c: '#34d399' }, { t: 'Battery', d: chartData.battery, c: '#fbbf24' }, { t: 'Signal', d: chartData.signal, c: '#f472b6' }]" :key="item.t" class="bg-gray-900 rounded p-1.5 flex flex-col">
-            <div class="text-[10px] text-gray-500 mb-0.5">{{ item.t }}</div>
+        <div class="grid grid-cols-2 gap-2" style="height: 170px">
+          <div v-for="item in [{ t: 'Alt', d: chartData.altitude, c: '#22d3ee' }, { t: 'Speed', d: chartData.speed, c: '#34d399' }, { t: 'Battery', d: chartData.battery, c: '#fbbf24' }, { t: 'Signal', d: chartData.signal, c: '#f472b6' }]" :key="item.t" class="bg-gray-900 rounded p-1 flex flex-col">
+            <div class="text-[9px] text-gray-500 mb-0.5">{{ item.t }}</div>
             <div class="flex-1 min-h-0"><Line :data="item.d" :options="chartOptions" /></div>
           </div>
         </div>
