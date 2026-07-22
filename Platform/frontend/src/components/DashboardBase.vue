@@ -1,64 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { useKakaoMap } from '@/composables/useKakaoMap'
-import { useTelemetryService } from '@/services/telemetryService'
-
-const telemetry = useTelemetryService()
-
-const mapReady = ref(false)
-const mapError = ref('')
-const mapContainer = ref<HTMLElement | null>(null)
-
-let kakaoMap: kakao.maps.Map | null = null
-const markers = new Map<string, kakao.maps.Marker>()
-
-function syncMarkers() {
-  if (!kakaoMap || !mapReady.value) return
-  const { makeMarker, moveMarker } = useKakaoMap()
-  for (const [id, m] of markers) {
-    if (!telemetry.droneIds.includes(id) && !telemetry.vehicleIds.includes(id)) {
-      m.setMap(null); markers.delete(id)
-    }
-  }
-  for (const id of telemetry.droneIds) {
-    const t = telemetry.latestOf(id)
-    if (!t) continue
-    if (markers.has(id)) moveMarker(markers.get(id)!, t.latitude, t.longitude)
-    else markers.set(id, makeMarker(kakaoMap, { lat: t.latitude, lng: t.longitude }, id))
-  }
-  for (const id of telemetry.vehicleIds) {
-    const t = telemetry.vehicleLatestOf(id)
-    if (!t) continue
-    if (markers.has(id)) moveMarker(markers.get(id)!, t.latitude, t.longitude)
-    else markers.set(id, makeMarker(kakaoMap, { lat: t.latitude, lng: t.longitude }, id))
-  }
-}
-
-watch(() => telemetry.version, syncMarkers)
-
-onMounted(async () => {
-  if (mapContainer.value) {
-    try {
-      const { createMap } = useKakaoMap()
-      kakaoMap = await createMap(mapContainer.value, { lat: 37.5665, lng: 126.978 }, 8)
-      mapReady.value = true
-    } catch (e: any) { mapError.value = e.message ?? 'Map load failed' }
-  }
-  if (!telemetry.version) telemetry.start()
-})
-
-onUnmounted(() => {
-  for (const m of markers.values()) m.setMap(null)
-  markers.clear()
-})
+import MapPanel from '@/components/MapPanel.vue'
 </script>
 
 <template>
   <div class="flex-1 flex flex-col min-h-0">
-    <!-- Map -->
-    <div ref="mapContainer" class="flex-1 bg-gray-800 border-gray-700 relative overflow-hidden">
-      <div v-if="mapError" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm bg-gray-800/80 z-20">{{ mapError }}</div>
-      <div v-if="!mapReady && !mapError" class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm z-20">Loading map...</div>
-    </div>
+    <MapPanel />
   </div>
 </template>
