@@ -39,4 +39,16 @@ public class VideoStream {
 
     @Column(name = "ended_at")
     private LocalDateTime endedAt;
+
+    public void updateStream(String streamUrl, String status, Mission mission) {
+        this.streamUrl = streamUrl;
+        this.status = status;
+        this.mission = mission;
+        if ("streaming".equals(status)) {
+            this.startedAt = LocalDateTime.now();
+            this.endedAt = null;
+        } else if ("inactive".equals(status)) {
+            this.endedAt = LocalDateTime.now();
+        }
+    }
 }
