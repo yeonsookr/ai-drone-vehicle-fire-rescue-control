@@ -75,23 +75,25 @@ async function loadCommands() {
   try {
     const { data } = await commandApi.list()
     commands.value = data
-      .filter((c: any) => c.target_id === id || c.target_id.startsWith(id.slice(0, 5)))
-      .slice(0, 6)
   } finally { commandsLoading.value = false }
 }
 
 watch(selectedId, () => { if (selectedId.value) loadCommands() })
 
-function cmdChain(cmd: any) {
-  if (cmd.parent_command_id) {
-    const parent = commands.value.find((c: any) => c.id === cmd.parent_command_id)
-    return parent ? `Server → ${parent.target_id} → ${cmd.target_id}` : `→ ${cmd.target_id}`
-  }
-  return `Server → ${cmd.target_id}`
+const commandChains = computed(() => {
+  const parents = commands.value.filter((c: any) => !c.parent_command_id)
+  return parents.map((p: any) => {
+    const child = commands.value.find((c: any) => c.parent_command_id === p.id) ?? null
+    return { parent: p, child }
+  })
+})
+
+function hopStatus(s: string) {
+  return { SUCCEEDED: 'text-green-400', FAILED: 'text-red-400', RUNNING: 'text-yellow-400', ACK: 'text-cyan-400', EXPIRED: 'text-gray-500' }[s] ?? 'text-gray-500'
 }
 
-function cmdStatusColor(s: string) {
-  return { SUCCEEDED: 'text-green-400', FAILED: 'text-red-400', RUNNING: 'text-yellow-400', ACK: 'text-cyan-400', EXPIRED: 'text-gray-500' }[s] ?? 'text-gray-400'
+function hopLabel(s: string) {
+  return s === 'SUCCEEDED' ? '✓' : s === 'FAILED' ? '✗' : s === 'RUNNING' ? '●' : s
 }
 
 onMounted(() => { telemetry.start(); device.fetchGateways() })
@@ -157,16 +159,39 @@ onUnmounted(() => { telemetry.stop() })
                 <div class="flex-1 min-h-0"><Line v-if="item.data.datasets[0].data.length > 1" :data="item.data as any" :options="chartOptions" /><div v-else class="flex items-center justify-center h-full text-gray-600 text-[10px]">...</div></div>
               </div>
             </div>
-            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Recent Commands</div>
+            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Command Chain</div>
             <div v-if="commandsLoading" class="text-xs text-gray-600">Loading...</div>
-            <div v-else class="space-y-1.5">
-              <div v-for="cmd in commands" :key="cmd.id" class="bg-gray-900 rounded px-2 py-1.5 text-[10px]">
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-300 font-mono">{{ cmd.type }}</span>
-                  <span class="font-medium" :class="cmdStatusColor(cmd.status)">{{ cmd.status }}</span>
+            <div v-else-if="commandChains.length === 0" class="text-xs text-gray-600">No commands</div>
+            <div v-else class="space-y-2">
+              <div v-for="chain in commandChains" :key="chain.parent.id" class="bg-gray-900 rounded px-3 py-2">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-gray-200">{{ chain.parent.type }}</span>
+                  <span class="text-[10px] text-gray-500">{{ chain.parent.issuer }}</span>
                 </div>
-                <div class="text-gray-500 mt-0.5">{{ cmdChain(cmd) }}</div>
-                <div class="text-gray-600">{{ fmtTime(cmd.issued_at) }}</div>
+                <div class="text-[10px] text-gray-500 mb-2">{{ fmtTime(chain.parent.issued_at) }}</div>
+                <div class="flex items-center gap-1 text-[10px]">
+                  <div class="flex flex-col items-center">
+                    <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                    <div class="text-cyan-400 mt-0.5">Server</div>
+                  </div>
+                  <div class="flex-1 h-px bg-gray-700 relative">
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.parent.status)">{{ hopLabel(chain.parent.status) }}</span>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <div class="w-2 h-2 rounded-full" :class="chain.parent.status === 'SUCCEEDED' ? 'bg-green-400' : chain.parent.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-500'"></div>
+                    <div class="text-gray-400 mt-0.5">{{ chain.parent.target_id }}</div>
+                  </div>
+                  <template v-if="chain.child">
+                    <div class="flex-1 h-px bg-gray-700 relative">
+                      <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.child.status)">{{ hopLabel(chain.child.status) }}</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <div class="w-2 h-2 rounded-full" :class="chain.child.status === 'SUCCEEDED' ? 'bg-green-400' : chain.child.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-500'"></div>
+                      <div class="text-gray-400 mt-0.5">{{ chain.child.target_id }}</div>
+                    </div>
+                  </template>
+                </div>
+                <div v-if="chain.child && chain.child.error_reason" class="text-[9px] text-red-400 mt-1">{{ chain.child.error_reason }}</div>
               </div>
             </div>
           </div>
