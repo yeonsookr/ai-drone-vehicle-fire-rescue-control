@@ -34,7 +34,8 @@ public class VideoStreamControllerTests {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .setPropertyNamingStrategy(com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE);
 
     private static final String VEHICLE_ID = "vehicle-test-id-999";
     private static final String DRONE_ID = "drone-test-id-999";
