@@ -91,7 +91,6 @@ onMounted(async () => {
                 <span class="text-[10px] font-mono" :class="segmentStatus(selected.status === 'COMPLETED' ? 'COMPLETED' : 'PENDING')">{{ selected.status === 'COMPLETED' ? 'OK' : '...' }}</span>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
