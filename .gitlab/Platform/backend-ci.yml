@@ -8,6 +8,8 @@ platform-backend-test:
     - if: $CI_COMMIT_BRANCH == "develop"
       changes:
         - Platform/backend/**/*
+        - .gitlab-ci.yml
+        - .gitlab/**/*
       when: always
     - when: never
 
@@ -25,5 +27,7 @@ platform-backend-build:
     - if: $CI_COMMIT_BRANCH == "develop"
       changes:
         - Platform/backend/**/*
+        - .gitlab-ci.yml
+        - .gitlab/**/*
       when: always
     - when: never

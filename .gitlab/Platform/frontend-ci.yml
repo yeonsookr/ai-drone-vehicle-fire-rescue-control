@@ -19,5 +19,7 @@ platform-frontend-build:
     - if: $CI_COMMIT_BRANCH == "develop"
       changes:
         - Platform/frontend/**/*
+        - .gitlab-ci.yml
+        - .gitlab/**/*
       when: always
     - when: never
