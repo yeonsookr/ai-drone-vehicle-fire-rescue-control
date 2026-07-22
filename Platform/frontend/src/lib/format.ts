@@ -34,3 +34,15 @@ export function isErrorBattery(battery: number): boolean {
 export function isWarnBattery(battery: number): boolean {
   return battery <= 30 && battery > 10
 }
+
+export function fmtSignal(rssi: number): string {
+  return `${rssi.toFixed(0)} dBm`
+}
+
+export function fmtAttitude(v: number): string {
+  return `${v.toFixed(1)}°`
+}
+
+export function fmtSensor(v: number, unit = ''): string {
+  return `${v.toFixed(1)}${unit}`
+}
