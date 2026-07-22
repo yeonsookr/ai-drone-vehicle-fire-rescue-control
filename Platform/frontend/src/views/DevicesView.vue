@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Plane, Satellite, Search, Plus, X } from '@lucide/vue'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
 import { useTelemetryService } from '@/services/telemetryService'
 import { useDeviceService } from '@/services/deviceService'
 import { fmtCoord, fmtTime, fmtBattery } from '@/lib/format'
+import { commandApi } from '@/lib/api/commands'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -64,6 +65,37 @@ function statusLabel(s: string) { return { FLYING: 'Flying', LANDING: 'Landing',
 function statusColor(s: string) { return { FLYING: 'text-green-400', LANDING: 'text-yellow-400', IDLE: 'text-gray-400', CHARGING: 'text-cyan-400', OFFLINE: 'text-red-400' }[s] ?? 'text-gray-400' }
 function batteryColor(b: number) { return b > 60 ? 'text-green-400' : b > 30 ? 'text-yellow-400' : 'text-red-400' }
 
+const commands = ref<any[]>([])
+const commandsLoading = ref(false)
+
+async function loadCommands() {
+  const id = selectedId.value
+  if (!id) return
+  commandsLoading.value = true
+  try {
+    const { data } = await commandApi.list()
+    commands.value = data
+  } finally { commandsLoading.value = false }
+}
+
+watch(selectedId, () => { if (selectedId.value) loadCommands() })
+
+const commandChains = computed(() => {
+  const parents = commands.value.filter((c: any) => !c.parent_command_id)
+  return parents.map((p: any) => {
+    const child = commands.value.find((c: any) => c.parent_command_id === p.id) ?? null
+    return { parent: p, child }
+  })
+})
+
+function hopStatus(s: string) {
+  return { SUCCEEDED: 'text-green-400', FAILED: 'text-red-400', RUNNING: 'text-yellow-400', ACK: 'text-cyan-400', EXPIRED: 'text-gray-500' }[s] ?? 'text-gray-500'
+}
+
+function hopIcon(s: string) {
+  return s === 'SUCCEEDED' ? 'OK' : s === 'FAILED' ? 'FAIL' : s === 'RUNNING' ? '...' : s
+}
+
 onMounted(() => { telemetry.start(); device.fetchGateways() })
 onUnmounted(() => { telemetry.stop() })
 </script>
@@ -110,9 +142,9 @@ onUnmounted(() => { telemetry.stop() })
         </div>
       </div>
       <Transition name="slide">
-        <div v-if="selectedItem && activeTab === 'drones'" class="w-80 border-l border-gray-800 overflow-y-auto shrink-0 flex flex-col bg-gray-850">
+        <div v-if="selectedItem && activeTab === 'drones'" class="w-1/2 border-l border-gray-800 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0"><h3 class="text-sm font-semibold text-gray-100">{{ selectedItem.id }}</h3><button @click="selectedId = null" class="text-gray-500 hover:text-gray-300 transition-colors"><X class="w-4 h-4" /></button></div>
-          <div class="flex-1 px-5 py-4 text-xs space-y-3">
+          <div class="flex-1 px-5 py-4 text-xs overflow-y-auto space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Model</span><span class="text-gray-200">{{ (selectedItem as any).model }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Gateway</span><span class="text-gray-200">{{ (selectedItem as any).gateway }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Battery</span><span class="text-gray-200" :class="batteryColor((selectedItem as any).battery)">{{ fmtBattery((selectedItem as any).battery) }}</span></div>
@@ -121,17 +153,52 @@ onUnmounted(() => { telemetry.stop() })
             <div class="flex justify-between"><span class="text-gray-500">Longitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lng.toFixed(6) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Last Seen</span><span class="text-gray-200">{{ fmtTime((selectedItem as any).updatedAt) }}</span></div>
             <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Metrics (recent 40s)</div>
-            <div class="grid grid-cols-2 gap-2" style="height: 160px">
+            <div class="grid grid-cols-2 grid-rows-2 gap-2" style="min-height: 300px">
               <div v-for="(item, idx) in [{ title: 'Alt', data: chartData.altitude, color: '#22d3ee' }, { title: 'Speed', data: chartData.speed, color: '#34d399' }, { title: 'Battery', data: chartData.battery, color: '#fbbf24' }, { title: 'Heading', data: chartData.heading, color: '#f472b6' }]" :key="idx" class="bg-gray-900 rounded p-1.5 flex flex-col">
                 <div class="text-[10px] text-gray-500 mb-0.5">{{ item.title }}</div>
                 <div class="flex-1 min-h-0"><Line v-if="item.data.datasets[0].data.length > 1" :data="item.data as any" :options="chartOptions" /><div v-else class="flex items-center justify-center h-full text-gray-600 text-[10px]">...</div></div>
+              </div>
+            </div>
+            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Command Chain</div>
+            <div v-if="commandsLoading" class="text-xs text-gray-600">Loading...</div>
+            <div v-else-if="commandChains.length === 0" class="text-xs text-gray-600">No commands</div>
+            <div v-else class="space-y-2">
+              <div v-for="chain in commandChains" :key="chain.parent.id" class="bg-gray-900 rounded px-3 py-2">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-gray-200">{{ chain.parent.type }}</span>
+                  <span class="text-[10px] text-gray-500">{{ chain.parent.issuer }}</span>
+                </div>
+                <div class="text-[10px] text-gray-500 mb-2">{{ fmtTime(chain.parent.issued_at) }}</div>
+                <div class="flex items-center gap-1 text-[10px]">
+                  <div class="flex flex-col items-center">
+                    <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                    <div class="text-cyan-400 mt-0.5">Server</div>
+                  </div>
+                  <div class="flex-1 h-px bg-gray-700 relative">
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.parent.status)">{{ hopIcon(chain.parent.status) }}</span>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <div class="w-2 h-2 rounded-full" :class="chain.parent.status === 'SUCCEEDED' ? 'bg-green-400' : chain.parent.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-500'"></div>
+                    <div class="text-gray-400 mt-0.5">{{ chain.parent.target_id }}</div>
+                  </div>
+                  <template v-if="chain.child">
+                    <div class="flex-1 h-px bg-gray-700 relative">
+                      <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.child.status)">{{ hopIcon(chain.child.status) }}</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <div class="w-2 h-2 rounded-full" :class="chain.child.status === 'SUCCEEDED' ? 'bg-green-400' : chain.child.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-500'"></div>
+                      <div class="text-gray-400 mt-0.5">{{ chain.child.target_id }}</div>
+                    </div>
+                  </template>
+                </div>
+                <div v-if="chain.child && chain.child.error_reason" class="text-[9px] text-red-400 mt-1">{{ chain.child.error_reason }}</div>
               </div>
             </div>
           </div>
         </div>
       </Transition>
       <Transition name="slide">
-        <div v-if="selectedItem && activeTab === 'gateways'" class="w-80 border-l border-gray-800 overflow-y-auto shrink-0 flex flex-col bg-gray-850">
+        <div v-if="selectedItem && activeTab === 'gateways'" class="w-1/2 border-l border-gray-800 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0"><h3 class="text-sm font-semibold text-gray-100">{{ (selectedItem as any).id }}</h3><button @click="selectedId = null" class="text-gray-500 hover:text-gray-300 transition-colors"><X class="w-4 h-4" /></button></div>
           <div class="flex-1 px-5 py-4 text-xs space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Name</span><span class="text-gray-200">{{ (selectedItem as any).name }}</span></div>
