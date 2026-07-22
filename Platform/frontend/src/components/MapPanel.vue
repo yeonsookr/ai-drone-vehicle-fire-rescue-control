@@ -103,21 +103,21 @@ onUnmounted(() => {
     <div v-if="mapError" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm bg-gray-800/80 z-20">{{ mapError }}</div>
     <div v-if="!mapReady && !mapError" class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm z-20">Loading map...</div>
 
-    <!-- Map controls -->
-    <div v-if="mapReady" class="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
-      <button @click="toggleMapType" title="Map type" class="w-9 h-9 bg-gray-900/80 hover:bg-gray-900 rounded-lg border border-gray-600 flex items-center justify-center text-xs text-gray-300 transition-colors">
-        <MapIcon v-if="mapType === 1" class="w-4 h-4" /><Satellite v-else class="w-4 h-4" />
+    <!-- Map controls (bottom center) -->
+    <div v-if="mapReady" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-gray-900/80 backdrop-blur rounded-lg border border-gray-700 px-2 py-1.5 shadow-lg">
+      <button @click="toggleMapType" title="Map type" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-300 transition-colors">
+        <MapIcon v-if="mapType === 1" class="w-3.5 h-3.5" /><Satellite v-else class="w-3.5 h-3.5" />
       </button>
-      <button @click="goToCurrentLocation" title="My location" class="w-9 h-9 bg-gray-900/80 hover:bg-gray-900 rounded-lg border border-gray-600 flex items-center justify-center text-xs text-gray-300 transition-colors">
-        <Crosshair class="w-4 h-4" />
+      <div class="w-px h-5 bg-gray-700"></div>
+      <button @click="goToCurrentLocation" title="My location" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-300 transition-colors">
+        <Crosshair class="w-3.5 h-3.5" />
       </button>
-    </div>
-    <div v-if="mapReady" class="absolute bottom-3 right-3 z-10 flex flex-col gap-px rounded-lg overflow-hidden shadow-lg">
-      <button @click="zoomIn" title="Zoom in" class="w-9 h-9 bg-gray-900/90 hover:bg-gray-700 flex items-center justify-center text-sm text-gray-200 transition-colors border-b border-gray-700">
-        <Plus class="w-4 h-4" />
+      <div class="w-px h-5 bg-gray-700"></div>
+      <button @click="zoomIn" title="Zoom in" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-sm text-gray-200 transition-colors">
+        <Plus class="w-3.5 h-3.5" />
       </button>
-      <button @click="zoomOut" title="Zoom out" class="w-9 h-9 bg-gray-900/90 hover:bg-gray-700 flex items-center justify-center text-sm text-gray-200 transition-colors">
-        <Minus class="w-4 h-4" />
+      <button @click="zoomOut" title="Zoom out" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-sm text-gray-200 transition-colors">
+        <Minus class="w-3.5 h-3.5" />
       </button>
     </div>
   </div>
