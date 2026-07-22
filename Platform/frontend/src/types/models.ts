@@ -121,6 +121,7 @@ export interface Mission {
   created_by: number
   created_at: Timestamp
   updated_at: Timestamp
+  failure_reason: string | null
 }
 
 export interface MissionWaypoint {
