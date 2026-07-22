@@ -15,5 +15,9 @@ platform-frontend-build:
     paths:
       - Platform/frontend/dist/
     expire_in: 1 hour
-  only:
-    - develop
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      changes:
+        - Platform/frontend/**/*
+      when: always
+    - when: never
