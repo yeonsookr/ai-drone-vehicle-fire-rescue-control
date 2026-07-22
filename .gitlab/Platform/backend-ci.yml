@@ -1,6 +1,13 @@
 platform-backend-test:
   stage: test
   image: gradle:8-jdk21
+  cache:
+    key:
+      files:
+        - Platform/backend/build.gradle
+        - Platform/backend/gradle/wrapper/gradle-wrapper.properties
+    paths:
+      - Platform/backend/.gradle/
   script:
     - cd Platform/backend
     - chmod +x gradlew
@@ -17,6 +24,13 @@ platform-backend-test:
 platform-backend-build:
   stage: build
   image: gradle:8-jdk21
+  cache:
+    key:
+      files:
+        - Platform/backend/build.gradle
+        - Platform/backend/gradle/wrapper/gradle-wrapper.properties
+    paths:
+      - Platform/backend/.gradle/
   script:
     - cd Platform/backend
     - chmod +x gradlew
