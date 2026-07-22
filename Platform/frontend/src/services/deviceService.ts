@@ -18,9 +18,22 @@ export function useDeviceService() {
         }
       })
     },
+    get vehicles() {
+      return ts.vehicleIds.map((id) => {
+        const t = ts.vehicleLatestOf(id)
+        return {
+          id, name: id, model: 'OrinCar', gateway: 'ORIN-001',
+          battery: t?.battery_level ?? 0,
+          status: (t ? 'MOVING' : 'OFFLINE') as 'idle' | 'moving' | 'stopped' | 'error' | 'offline',
+          lat: t?.latitude ?? 0, lng: t?.longitude ?? 0,
+          updatedAt: t?.recorded_at ?? '-',
+        }
+      })
+    },
     get gateways() { return ds.gateways },
     get connected() { return ts.connected },
     fetchGateways: () => ds.fetchGateways(),
     historyOf: (id: string) => ts.historyOf(id),
+    vehicleHistoryOf: (id: string) => ts.vehicleHistoryOf(id),
   }
 }
