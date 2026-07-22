@@ -1,0 +1,19 @@
+frontend-build:
+  stage: build
+  image: node:20-alpine
+  cache:
+    key:
+      files:
+        - Platform/frontend/package-lock.json
+    paths:
+      - Platform/frontend/node_modules/
+  script:
+    - cd Platform/frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - Platform/frontend/dist/
+    expire_in: 1 hour
+  only:
+    - develop

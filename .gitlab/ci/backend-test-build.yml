@@ -1,0 +1,21 @@
+backend-test:
+  stage: test
+  image: gradle:8-jdk21
+  script:
+    - cd Platform/backend
+    - ./gradlew test
+  only:
+    - develop
+
+backend-build:
+  stage: build
+  image: gradle:8-jdk21
+  script:
+    - cd Platform/backend
+    - ./gradlew build -x test
+  artifacts:
+    paths:
+      - Platform/backend/build/libs/app.jar
+    expire_in: 1 hour
+  only:
+    - develop
