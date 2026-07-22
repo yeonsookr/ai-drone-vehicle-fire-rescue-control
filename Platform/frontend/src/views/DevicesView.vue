@@ -80,7 +80,10 @@ onUnmounted(() => { telemetry.stop() })
 </script>
 
 <template>
-  <OverlayPanel title="Devices">
+  <OverlayPanel>
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-[11px] font-semibold text-gray-500 uppercase">Devices</span>
+    </div>
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
         <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />

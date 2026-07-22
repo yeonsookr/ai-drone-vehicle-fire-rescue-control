@@ -54,10 +54,11 @@ function signalColor(s: number) { return s > -75 ? 'text-green-400' : s > -85 ? 
 </script>
 
 <template>
-  <OverlayPanel title="Telemetry">
-    <template #badge>
+  <OverlayPanel>
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-[11px] font-semibold text-gray-500 uppercase">Telemetry</span>
       <span v-if="device.disconnectedDevices.length > 0" class="text-[10px] px-2 py-0.5 rounded-full bg-red-900 text-red-300">! {{ device.disconnectedDevices.length }} disconnected</span>
-    </template>
+    </div>
     <div v-if="device.equipmentCards.length === 0" class="flex items-center justify-center h-20 text-gray-600 text-xs">Waiting for telemetry...</div>
     <div v-else class="grid grid-cols-2 gap-2">
       <div v-for="card in device.equipmentCards" :key="card.id" @click="selectedDevice = selectedDevice === card.id ? null : card.id"

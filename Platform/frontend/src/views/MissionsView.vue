@@ -39,8 +39,11 @@ async function handleCancel(id: string) { try { await ms.cancel(id) } catch {} }
 </script>
 
 <template>
-  <OverlayPanel title="Missions">
-    <template #badge><span class="text-[10px] text-gray-500">{{ ms.missions.length }} total</span></template>
+  <OverlayPanel>
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-[11px] font-semibold text-gray-500 uppercase">Missions</span>
+      <span class="text-[10px] text-gray-500">{{ ms.missions.length }} total</span>
+    </div>
 
     <!-- Mission list -->
     <div v-if="ms.loading" class="text-xs text-gray-500">Loading...</div>
