@@ -103,16 +103,16 @@ onUnmounted(() => {
     <div v-if="mapError" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm bg-gray-800/80 z-20">{{ mapError }}</div>
     <div v-if="!mapReady && !mapError" class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm z-20">Loading map...</div>
 
-    <!-- Map controls (bottom center) -->
-    <div v-if="mapReady" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-gray-900/80 backdrop-blur rounded-lg border border-gray-700 px-2 py-1.5 shadow-lg">
+    <!-- Map controls (좌측 중앙, 세로) -->
+    <div v-if="mapReady" class="absolute top-1/2 -translate-y-1/2 left-3 z-10 flex flex-col items-center gap-1.5 bg-gray-900/80 backdrop-blur rounded-lg border border-gray-700 py-2 px-1.5 shadow-lg">
       <button @click="toggleMapType" title="Map type" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-300 transition-colors">
         <MapIcon v-if="mapType === 1" class="w-3.5 h-3.5" /><Satellite v-else class="w-3.5 h-3.5" />
       </button>
-      <div class="w-px h-5 bg-gray-700"></div>
+      <div class="w-5 h-px bg-gray-700"></div>
       <button @click="goToCurrentLocation" title="My location" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-300 transition-colors">
         <Crosshair class="w-3.5 h-3.5" />
       </button>
-      <div class="w-px h-5 bg-gray-700"></div>
+      <div class="w-5 h-px bg-gray-700"></div>
       <button @click="zoomIn" title="Zoom in" class="w-7 h-7 hover:bg-gray-700 rounded flex items-center justify-center text-sm text-gray-200 transition-colors">
         <Plus class="w-3.5 h-3.5" />
       </button>
