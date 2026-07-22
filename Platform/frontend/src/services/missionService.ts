@@ -5,6 +5,7 @@ export function useMissionService() {
 
   return {
     get missions() { return s.missions },
+    get selectedId() { return s.selectedId },
     get selected() { return s.selected },
     get selectedLogs() { return s.selectedLogs },
     get selectedCommands() { return s.selectedCommands },
