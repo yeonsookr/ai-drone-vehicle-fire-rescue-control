@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { LayoutDashboard, HardDrive, LineChart, TriangleAlert } from '@lucide/vue'
+import { LayoutDashboard, HardDrive, LineChart, TriangleAlert, Map as MapIcon } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,6 +11,7 @@ const navItems = [
   { name: 'Devices', path: '/devices', icon: HardDrive },
   { name: 'Telemetry', path: '/telemetry', icon: LineChart },
   { name: 'Detections', path: '/detections', icon: TriangleAlert },
+  { name: 'Missions', path: '/missions', icon: MapIcon },
 ]
 
 const activeIndex = computed(() => navItems.findIndex((n) => n.path === route.path))
