@@ -16,8 +16,8 @@ const connected = computed(() => telemetry.connected)
       <MapPanel class="absolute inset-0 z-0" />
       <!-- Page overlays on top of map -->
       <div class="absolute inset-0 z-10 flex justify-end p-4 pointer-events-none">
-        <div class="w-1/2 flex flex-col pointer-events-auto">
-          <router-view />
+        <div class="w-1/2 h-full flex flex-col pointer-events-auto min-h-0">
+          <router-view class="flex-1 min-h-0" />
         </div>
       </div>
     </main>

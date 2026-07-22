@@ -99,7 +99,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="mapContainer" class="flex-1 bg-gray-800 border-gray-700 relative overflow-hidden">
+  <div ref="mapContainer" class="h-full w-full bg-gray-800 border-gray-700 relative overflow-hidden">
     <div v-if="mapError" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm bg-gray-800/80 z-20">{{ mapError }}</div>
     <div v-if="!mapReady && !mapError" class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm z-20">Loading map...</div>
 
