@@ -92,8 +92,8 @@ function hopStatus(s: string) {
   return { SUCCEEDED: 'text-green-400', FAILED: 'text-red-400', RUNNING: 'text-yellow-400', ACK: 'text-cyan-400', EXPIRED: 'text-gray-500' }[s] ?? 'text-gray-500'
 }
 
-function hopLabel(s: string) {
-  return s === 'SUCCEEDED' ? '✓' : s === 'FAILED' ? '✗' : s === 'RUNNING' ? '●' : s
+function hopIcon(s: string) {
+  return s === 'SUCCEEDED' ? 'OK' : s === 'FAILED' ? 'FAIL' : s === 'RUNNING' ? '...' : s
 }
 
 onMounted(() => { telemetry.start(); device.fetchGateways() })
@@ -175,7 +175,7 @@ onUnmounted(() => { telemetry.stop() })
                     <div class="text-cyan-400 mt-0.5">Server</div>
                   </div>
                   <div class="flex-1 h-px bg-gray-700 relative">
-                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.parent.status)">{{ hopLabel(chain.parent.status) }}</span>
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.parent.status)">{{ hopIcon(chain.parent.status) }}</span>
                   </div>
                   <div class="flex flex-col items-center">
                     <div class="w-2 h-2 rounded-full" :class="chain.parent.status === 'SUCCEEDED' ? 'bg-green-400' : chain.parent.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-500'"></div>
@@ -183,7 +183,7 @@ onUnmounted(() => { telemetry.stop() })
                   </div>
                   <template v-if="chain.child">
                     <div class="flex-1 h-px bg-gray-700 relative">
-                      <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.child.status)">{{ hopLabel(chain.child.status) }}</span>
+                      <span class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] whitespace-nowrap" :class="hopStatus(chain.child.status)">{{ hopIcon(chain.child.status) }}</span>
                     </div>
                     <div class="flex flex-col items-center">
                       <div class="w-2 h-2 rounded-full" :class="chain.child.status === 'SUCCEEDED' ? 'bg-green-400' : chain.child.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-500'"></div>
