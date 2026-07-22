@@ -1,9 +1,7 @@
 stages:
   - test
   - build
-  - deploy
 
 include:
   - local: '.gitlab/ci/backend-test-build.yml'
   - local: '.gitlab/ci/frontend-build.yml'
-  - local: '.gitlab/ci/deploy-ec2.yml'
