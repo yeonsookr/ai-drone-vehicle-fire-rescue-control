@@ -17,7 +17,7 @@ const markers = new Map<string, kakao.maps.Marker>()
 
 function syncMarkers() {
   if (!kakaoMap || !mapReady.value) return
-  const { makeMarker, moveMarker } = useKakaoMap()
+  const { makeDeviceMarker, moveMarker } = useKakaoMap()
 
   // Clean removed devices
   for (const [id, m] of markers) {
@@ -26,20 +26,20 @@ function syncMarkers() {
     }
   }
 
-  // Sync drone markers
+  // Sync drone markers (cyan teardrop)
   for (const id of telemetry.droneIds) {
     const t = telemetry.latestOf(id)
     if (!t) continue
     if (markers.has(id)) moveMarker(markers.get(id)!, t.latitude, t.longitude)
-    else markers.set(id, makeMarker(kakaoMap, { lat: t.latitude, lng: t.longitude }, id))
+    else markers.set(id, makeDeviceMarker(kakaoMap, { lat: t.latitude, lng: t.longitude }, 'drone', id))
   }
 
-  // Sync vehicle markers
+  // Sync vehicle markers (yellow teardrop)
   for (const id of telemetry.vehicleIds) {
     const t = telemetry.vehicleLatestOf(id)
     if (!t) continue
     if (markers.has(id)) moveMarker(markers.get(id)!, t.latitude, t.longitude)
-    else markers.set(id, makeMarker(kakaoMap, { lat: t.latitude, lng: t.longitude }, id))
+    else markers.set(id, makeDeviceMarker(kakaoMap, { lat: t.latitude, lng: t.longitude }, 'vehicle', id))
   }
 }
 
