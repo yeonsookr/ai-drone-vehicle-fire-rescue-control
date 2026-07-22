@@ -5,6 +5,8 @@ import {
   HardDrive, Cable, BatteryWarning, ScrollText, Server, Settings,
 } from '@lucide/vue'
 
+defineProps<{ connected: boolean }>()
+
 const route = useRoute()
 const router = useRouter()
 
@@ -65,8 +67,9 @@ function navigate(path?: string) {
 
 <template>
   <aside class="w-56 shrink-0 border-r border-gray-800 flex flex-col bg-[#1a1a1a]">
-    <div class="h-14 flex items-center px-4 border-b border-gray-800 text-[11px] font-bold tracking-widest text-gray-500 uppercase">
-      AIoT CTRL
+    <div class="h-14 flex items-center justify-between px-4 border-b border-gray-800">
+      <span class="text-[11px] font-bold tracking-widest text-gray-500 uppercase">AIoT CTRL</span>
+      <span class="text-[10px]" :class="connected ? 'text-green-400' : 'text-red-400'">{{ connected ? '● Connected' : '○ Disconnected' }}</span>
     </div>
     <nav class="flex-1 overflow-y-auto py-2">
       <div v-for="group in navGroups" :key="group.label" class="mb-1">
