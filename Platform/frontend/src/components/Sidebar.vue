@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import {
-  LayoutDashboard, MapIcon, LineChart, HardDrive, Settings,
+  LayoutDashboard, MapIcon, LineChart, Settings,
 } from '@lucide/vue'
 
 const route = useRoute()
@@ -12,8 +12,7 @@ interface NavItem { name: string; path: string; icon: any }
 const navItems: NavItem[] = [
   { name: '대시보드', path: '/dashboard', icon: LayoutDashboard },
   { name: '임무', path: '/missions', icon: MapIcon },
-  { name: '텔레메트리', path: '/telemetry', icon: LineChart },
-  { name: '장비', path: '/devices', icon: HardDrive },
+  { name: '장비', path: '/telemetry', icon: LineChart },
   { name: '설정', path: '/system/settings', icon: Settings },
 ]
 
