@@ -1,5 +1,21 @@
 import { useDeviceStore } from '@/stores/device'
 import { useTelemetryStore } from '@/stores/telemetry'
+import type { DroneTelemetry, VehicleTelemetry } from '@/types'
+
+export interface EquipmentCard {
+  id: string
+  label: string
+  type: 'drone' | 'vehicle'
+  battery: number
+  altitude: number
+  speed: number
+  signal: number
+  stale: boolean
+}
+
+function isStale(recordedAt: string): boolean {
+  return Date.now() - new Date(recordedAt).getTime() > 4000
+}
 
 export function useDeviceService() {
   const ts = useTelemetryStore()
@@ -30,10 +46,40 @@ export function useDeviceService() {
         }
       })
     },
+    get equipmentCards(): EquipmentCard[] {
+      const cards: EquipmentCard[] = []
+      for (const id of ts.droneIds) {
+        const t = ts.latestOf(id)
+        if (!t) continue
+        cards.push({
+          id, label: id, type: 'drone',
+          battery: t.battery_level, altitude: t.altitude, speed: t.speed, signal: t.signal_strength,
+          stale: isStale(t.recorded_at),
+        })
+      }
+      for (const id of ts.vehicleIds) {
+        const t = ts.vehicleLatestOf(id)
+        if (!t) continue
+        cards.push({
+          id, label: id, type: 'vehicle',
+          battery: t.battery_level, altitude: t.altitude, speed: t.speed, signal: t.signal_strength,
+          stale: isStale(t.recorded_at),
+        })
+      }
+      return cards
+    },
+    get disconnectedDevices(): EquipmentCard[] {
+      return this.equipmentCards.filter(c => c.stale || c.signal < -85)
+    },
     get gateways() { return ds.gateways },
     get connected() { return ts.connected },
     fetchGateways: () => ds.fetchGateways(),
     historyOf: (id: string) => ts.historyOf(id),
     vehicleHistoryOf: (id: string) => ts.vehicleHistoryOf(id),
+    deviceHistoryOf(id: string): (DroneTelemetry | VehicleTelemetry)[] {
+      const drone = ts.historyOf(id)
+      if (drone.length > 0) return drone
+      return ts.vehicleHistoryOf(id)
+    },
   }
 }
