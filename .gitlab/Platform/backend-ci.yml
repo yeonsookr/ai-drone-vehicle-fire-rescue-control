@@ -3,6 +3,7 @@ platform-backend-test:
   image: gradle:8-jdk21
   script:
     - cd Platform/backend
+    - chmod +x gradlew
     - ./gradlew test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -18,6 +19,7 @@ platform-backend-build:
   image: gradle:8-jdk21
   script:
     - cd Platform/backend
+    - chmod +x gradlew
     - ./gradlew build -x test
   artifacts:
     paths:
