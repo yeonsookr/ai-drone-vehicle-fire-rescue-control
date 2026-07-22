@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useDeviceService } from '@/services/deviceService'
 import { Plane, Satellite, Wifi, WifiOff } from '@lucide/vue'
 import OverlayPanel from '@/components/OverlayPanel.vue'
+import PanelSection from '@/components/PanelSection.vue'
 
 const router = useRouter()
 
@@ -21,10 +22,9 @@ function signalColor(s: number) { return s > -75 ? 'text-green-400' : s > -85 ? 
 
 <template>
   <OverlayPanel>
-    <div class="flex items-center justify-between mb-3">
-      <span class="text-[11px] font-semibold text-gray-500 uppercase">Devices</span>
-      <span v-if="device.disconnectedDevices.length > 0" class="text-[10px] px-2 py-0.5 rounded-full bg-red-900 text-red-300">! {{ device.disconnectedDevices.length }} disconnected</span>
-    </div>
+    <PanelSection label="Devices">
+      <template #badge><span v-if="device.disconnectedDevices.length > 0" class="text-[10px] px-2 py-0.5 rounded-full bg-red-900 text-red-300">! {{ device.disconnectedDevices.length }} disconnected</span></template>
+    </PanelSection>
 
     <!-- Filter tabs -->
     <div class="flex gap-0.5 mb-3 p-0.5 bg-gray-800 rounded-lg w-fit">
