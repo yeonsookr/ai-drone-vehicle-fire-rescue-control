@@ -142,7 +142,7 @@ onUnmounted(() => { telemetry.stop() })
         </div>
       </div>
       <Transition name="slide">
-        <div v-if="selectedItem && activeTab === 'drones'" class="w-96 border-l border-gray-800 flex flex-col bg-gray-850">
+        <div v-if="selectedItem && activeTab === 'drones'" class="w-1/2 border-l border-gray-800 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0"><h3 class="text-sm font-semibold text-gray-100">{{ selectedItem.id }}</h3><button @click="selectedId = null" class="text-gray-500 hover:text-gray-300 transition-colors"><X class="w-4 h-4" /></button></div>
           <div class="flex-1 px-5 py-4 text-xs overflow-y-auto space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Model</span><span class="text-gray-200">{{ (selectedItem as any).model }}</span></div>
@@ -198,7 +198,7 @@ onUnmounted(() => { telemetry.stop() })
         </div>
       </Transition>
       <Transition name="slide">
-        <div v-if="selectedItem && activeTab === 'gateways'" class="w-96 border-l border-gray-800 overflow-y-auto shrink-0 flex flex-col bg-gray-850">
+        <div v-if="selectedItem && activeTab === 'gateways'" class="w-1/2 border-l border-gray-800 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0"><h3 class="text-sm font-semibold text-gray-100">{{ (selectedItem as any).id }}</h3><button @click="selectedId = null" class="text-gray-500 hover:text-gray-300 transition-colors"><X class="w-4 h-4" /></button></div>
           <div class="flex-1 px-5 py-4 text-xs space-y-3">
             <div class="flex justify-between"><span class="text-gray-500">Name</span><span class="text-gray-200">{{ (selectedItem as any).name }}</span></div>
