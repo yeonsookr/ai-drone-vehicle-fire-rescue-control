@@ -1,4 +1,4 @@
-import type { DroneTelemetry } from '@/types'
+import type { DroneTelemetry, VehicleTelemetry } from '@/types'
 
 type TelemetryCallback = (entry: DroneTelemetry) => void
 
@@ -52,6 +52,52 @@ export function subscribeTelemetry(callback: TelemetryCallback): () => void {
     if (intervalId !== null) {
       clearInterval(intervalId)
       intervalId = null
+    }
+  }
+}
+
+// ── Vehicle telemetry ──
+let vehicleIntervalId: ReturnType<typeof setInterval> | null = null
+let vehicleCounter = 0
+
+const VEHICLE_IDS = ['VEH-001', 'VEH-002', 'VEH-003']
+const VEHICLE_POSITIONS: Record<string, { lat: number; lng: number; alt: number }> = {
+  'VEH-001': { lat: 37.5680, lng: 126.9770, alt: 20 },
+  'VEH-002': { lat: 37.5540, lng: 126.9910, alt: 18 },
+  'VEH-003': { lat: 37.5750, lng: 126.9720, alt: 22 },
+}
+
+function generateVehicle(): VehicleTelemetry {
+  vehicleCounter++
+  const idx = vehicleCounter % VEHICLE_IDS.length
+  const id = VEHICLE_IDS[idx]
+  const base = VEHICLE_POSITIONS[id]
+
+  return {
+    vehicle_id: id,
+    latitude: stepPos(base.lat, vehicleCounter, idx * 120),
+    longitude: stepPos(base.lng, vehicleCounter, idx * 120 + 45),
+    altitude: base.alt + Math.sin(vehicleCounter * 0.08 + idx) * 5,
+    speed: 3 + Math.sin(vehicleCounter * 0.04 + idx) * 2,
+    battery_level: Math.max(0, 85 - vehicleCounter * 0.01),
+    pitch: 0,
+    roll: 0,
+    yaw: 0,
+    signal_strength: -60 + Math.random() * 20,
+    raw_data: null,
+    recorded_at: new Date().toISOString(),
+  }
+}
+
+export function subscribeVehicleTelemetry(callback: (entry: VehicleTelemetry) => void): () => void {
+  vehicleIntervalId = setInterval(() => {
+    callback(generateVehicle())
+  }, 350)
+
+  return () => {
+    if (vehicleIntervalId !== null) {
+      clearInterval(vehicleIntervalId)
+      vehicleIntervalId = null
     }
   }
 }
