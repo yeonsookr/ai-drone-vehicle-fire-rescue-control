@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   LayoutDashboard, MapIcon, LineChart, Video, TriangleAlert,
-  HardDrive, Cable, BatteryWarning, ScrollText, Server, Settings, ChevronDown,
+  HardDrive, Cable, BatteryWarning, ScrollText, Server, Settings,
 } from '@lucide/vue'
 
 const route = useRoute()
@@ -13,10 +12,9 @@ interface NavItem {
   name: string
   path?: string
   icon?: any
-  children?: NavItem[]
 }
 
-const navGroups = ref<{ label: string; items: NavItem[] }[]>([
+const navGroups: { label: string; items: NavItem[] }[] = [
   { label: '', items: [{ name: '대시보드', path: '/dashboard', icon: LayoutDashboard }] },
   {
     label: '임무',
@@ -53,14 +51,7 @@ const navGroups = ref<{ label: string; items: NavItem[] }[]>([
       { name: '설정', path: '/system/settings', icon: Settings },
     ],
   },
-])
-
-const expandedGroups = ref<Set<string>>(new Set(['임무', '관측']))
-
-function toggleGroup(label: string) {
-  if (expandedGroups.value.has(label)) expandedGroups.value.delete(label)
-  else expandedGroups.value.add(label)
-}
+]
 
 function isActive(path?: string) {
   if (!path) return false
@@ -79,26 +70,19 @@ function navigate(path?: string) {
     </div>
     <nav class="flex-1 overflow-y-auto py-2">
       <div v-for="group in navGroups" :key="group.label" class="mb-1">
-        <div
-          v-if="group.label"
-          @click="toggleGroup(group.label)"
-          class="flex items-center gap-1 px-4 py-1.5 text-[10px] font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none hover:text-gray-400"
-        >
-          <ChevronDown class="w-3 h-3 transition-transform" :class="expandedGroups.has(group.label) ? '' : '-rotate-90'" />
+        <div v-if="group.label" class="px-4 py-1.5 text-[10px] font-semibold text-gray-600 uppercase tracking-wider select-none">
           {{ group.label }}
         </div>
-        <template v-if="!group.label || expandedGroups.has(group.label)">
-          <button
-            v-for="item in group.items"
-            :key="item.name"
-            @click="navigate(item.path)"
-            class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left transition-colors duration-150"
-            :class="isActive(item.path) ? 'text-gray-100 bg-gray-800/60 border-l-2 border-gray-400' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/30'"
-          >
-            <component :is="item.icon" v-if="item.icon" class="w-4 h-4 shrink-0" />
-            {{ item.name }}
-          </button>
-        </template>
+        <button
+          v-for="item in group.items"
+          :key="item.name"
+          @click="navigate(item.path)"
+          class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left transition-colors duration-150"
+          :class="isActive(item.path) ? 'text-gray-100 bg-gray-800/60 border-l-2 border-gray-400' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/30'"
+        >
+          <component :is="item.icon" v-if="item.icon" class="w-4 h-4 shrink-0" />
+          {{ item.name }}
+        </button>
       </div>
     </nav>
   </aside>
