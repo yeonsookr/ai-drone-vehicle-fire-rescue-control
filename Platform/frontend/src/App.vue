@@ -44,10 +44,10 @@ function closeFloating(key: string) {
     </main>
 
     <!-- Floating overlays -->
-    <div v-if="detailId" class="absolute z-20 top-4 right-4" @click.stop>
+    <div v-if="detailId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
       <FloatingDetail :device-id="detailId" @close="closeFloating('detail')" />
     </div>
-    <div v-if="missionId" class="absolute z-20 top-4 right-4" @click.stop>
+    <div v-if="missionId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
       <FloatingMissionDetail :mission-id="missionId" @close="closeFloating('mission')" />
     </div>
   </div>
