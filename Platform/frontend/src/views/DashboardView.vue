@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useTelemetryService } from '@/services/telemetryService'
 import OverlayPanel from '@/components/OverlayPanel.vue'
-
-const telemetry = useTelemetryService()
-const activeDrones = computed(() => telemetry.droneIds.length)
-const activeVehicles = computed(() => telemetry.vehicleIds.length)
 </script>
 
 <template>
@@ -18,8 +12,5 @@ const activeVehicles = computed(() => telemetry.vehicleIds.length)
         </div>
       </div>
     </OverlayPanel>
-    <div class="h-12 bg-gray-800/90 backdrop-blur rounded-lg border border-gray-700 flex items-center px-4 shrink-0">
-      <span class="text-xs text-gray-500">Drones: {{ activeDrones }} | Vehicles: {{ activeVehicles }}</span>
-    </div>
   </div>
 </template>
