@@ -54,7 +54,7 @@ function canCancel(m: { status: string }) { return ['CREATED', 'IN_PROGRESS', 'P
       <button @click="activeTab = 'log'" class="flex-1 py-2 text-[10px] font-medium transition-colors" :class="activeTab === 'log' ? 'text-gray-100 border-b-2 border-gray-400' : 'text-gray-500 hover:text-gray-300'">Log</button>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-0">
+    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-[300px]">
       <template v-if="activeTab === 'info' && mission">
         <div class="space-y-2 mb-3">
           <div class="flex justify-between text-[11px]"><span class="text-gray-500">Type</span><span class="text-gray-200">{{ mission.type }}</span></div>

@@ -56,7 +56,7 @@ const card = computed(() => device.equipmentCards.find(c => c.id === props.devic
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-0">
+    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-[300px]">
       <!-- Charts tab -->
       <template v-if="activeTab === 'charts'">
         <div v-if="card" class="grid grid-cols-2 gap-x-4 gap-y-1 mb-3 p-2 bg-gray-800/60 rounded">
