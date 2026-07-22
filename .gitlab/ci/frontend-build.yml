@@ -1,4 +1,4 @@
-frontend-build:
+platform-frontend-build:
   stage: build
   image: node:20-alpine
   cache:

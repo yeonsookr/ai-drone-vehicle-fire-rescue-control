@@ -1,4 +1,4 @@
-backend-test:
+platform-backend-test:
   stage: test
   image: gradle:8-jdk21
   script:
@@ -7,7 +7,7 @@ backend-test:
   only:
     - develop
 
-backend-build:
+platform-backend-build:
   stage: build
   image: gradle:8-jdk21
   script:
