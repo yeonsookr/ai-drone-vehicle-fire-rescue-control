@@ -3,5 +3,5 @@ stages:
   - build
 
 include:
-  - local: '.gitlab/ci/platform/backend-test-build.yml'
-  - local: '.gitlab/ci/platform/frontend-build.yml'
+  - local: '.gitlab/Platform/backend-ci.yml'
+  - local: '.gitlab/Platform/frontend-ci.yml'
