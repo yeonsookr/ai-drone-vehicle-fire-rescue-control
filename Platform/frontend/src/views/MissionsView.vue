@@ -57,8 +57,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <Transition name="slide">
-        <div v-if="selected" class="w-96 border-l border-gray-800 flex flex-col bg-gray-850">
+      <div v-if="selected" class="w-1/2 border-l border-gray-800 flex flex-col bg-gray-850">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0">
             <h3 class="text-sm font-semibold text-gray-100">{{ selected.id }}</h3>
             <button @click="selectedId = null" class="text-gray-500 hover:text-gray-300"><X class="w-4 h-4" /></button>
@@ -94,12 +93,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-      </Transition>
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.slide-enter-active, .slide-leave-active { transition: width 0.2s ease, opacity 0.2s ease; }
-.slide-enter-from, .slide-leave-to { width: 0 !important; opacity: 0; overflow: hidden; }
-</style>
