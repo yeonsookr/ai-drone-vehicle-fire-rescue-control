@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import {
-  LayoutDashboard, MapIcon, LineChart, Video, TriangleAlert,
-  HardDrive, Cable, BatteryWarning, ScrollText, Server, Settings,
+  LayoutDashboard, MapIcon, LineChart, HardDrive, Settings,
 } from '@lucide/vue'
 
 defineProps<{ connected: boolean }>()
@@ -28,28 +27,17 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     label: '관측',
     items: [
       { name: '텔레메트리', path: '/telemetry', icon: LineChart },
-      { name: '영상 스트림', path: '/streams', icon: Video },
-      { name: 'AI 탐지', path: '/detections', icon: TriangleAlert },
     ],
   },
   {
     label: '장비',
     items: [
       { name: '장비 목록', path: '/devices', icon: HardDrive },
-      { name: '페어링', path: '/pairings', icon: Cable },
-    ],
-  },
-  {
-    label: '운영',
-    items: [
-      { name: '배터리 현황', path: '/operations/battery', icon: BatteryWarning },
-      { name: '운영 로그', path: '/operations/logs', icon: ScrollText },
     ],
   },
   {
     label: '시스템',
     items: [
-      { name: '서버 상태', path: '/system/server', icon: Server },
       { name: '설정', path: '/system/settings', icon: Settings },
     ],
   },
