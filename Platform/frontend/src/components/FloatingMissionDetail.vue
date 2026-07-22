@@ -38,7 +38,7 @@ function canCancel(m: { status: string }) { return ['CREATED', 'IN_PROGRESS', 'P
 </script>
 
 <template>
-  <div class="w-96 bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden max-h-[80vh]">
+  <div class="w-96 h-full bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden">
     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700">
       <div class="flex items-center gap-2">
         <span class="text-sm font-semibold text-gray-100">{{ props.missionId }}</span>
@@ -54,7 +54,7 @@ function canCancel(m: { status: string }) { return ['CREATED', 'IN_PROGRESS', 'P
       <button @click="activeTab = 'log'" class="flex-1 py-2 text-[10px] font-medium transition-colors" :class="activeTab === 'log' ? 'text-gray-100 border-b-2 border-gray-400' : 'text-gray-500 hover:text-gray-300'">Log</button>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-[300px]">
+    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-75">
       <template v-if="activeTab === 'info' && mission">
         <div class="space-y-2 mb-3">
           <div class="flex justify-between text-[11px]"><span class="text-gray-500">Type</span><span class="text-gray-200">{{ mission.type }}</span></div>

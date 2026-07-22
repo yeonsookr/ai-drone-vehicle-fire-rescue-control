@@ -39,7 +39,7 @@ const card = computed(() => device.equipmentCards.find(c => c.id === props.devic
 </script>
 
 <template>
-  <div class="w-96 bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden max-h-[80vh]">
+  <div class="w-96 h-full bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700">
       <div class="flex items-center gap-2">
@@ -56,7 +56,7 @@ const card = computed(() => device.equipmentCards.find(c => c.id === props.devic
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-[300px]">
+    <div class="flex-1 overflow-y-auto p-3 text-xs min-h-75">
       <!-- Charts tab -->
       <template v-if="activeTab === 'charts'">
         <div v-if="card" class="grid grid-cols-2 gap-x-4 gap-y-1 mb-3 p-2 bg-gray-800/60 rounded">
