@@ -1,11 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Plane, Satellite, Search, Plus, X } from '@lucide/vue'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
 import { useTelemetryService } from '@/services/telemetryService'
 import { useDeviceService } from '@/services/deviceService'
-import { fmtCoord, fmtTime, fmtBattery } from '@/lib/format'
+import { fmtCoord, fmtTime, fmtBattery, fmtSignal, fmtAttitude } from '@/lib/format'
 import { commandApi } from '@/lib/api/commands'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
@@ -59,6 +59,11 @@ const chartData = computed(() => {
   }
 })
 
+const selectedTelemetry = computed(() => {
+  if (!selectedId.value || activeTab.value !== 'drones') return null
+  return telemetry.latestOf(selectedId.value)
+})
+
 function select(id: string) { selectedId.value = selectedId.value === id ? null : id }
 
 function statusLabel(s: string) { return { FLYING: 'Flying', LANDING: 'Landing', IDLE: 'Idle', CHARGING: 'Charging', OFFLINE: 'Offline' }[s] ?? s }
@@ -105,7 +110,7 @@ onUnmounted(() => { telemetry.stop() })
     <div class="h-14 flex items-center justify-between px-6 border-b border-gray-800 shrink-0">
       <h1 class="text-base font-bold text-gray-100">Devices</h1>
       <div class="flex items-center gap-3">
-        <span class="text-xs px-2 py-0.5 rounded-full" :class="device.connected ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'">{{ device.connected ? '● Live' : '○ Offline' }}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full" :class="device.connected ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'">{{ device.connected ? '??Live' : '??Offline' }}</span>
         <button class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs text-gray-400 transition-colors"><Plus class="w-3.5 h-3.5" /> Add Device</button>
       </div>
     </div>
@@ -151,8 +156,15 @@ onUnmounted(() => { telemetry.stop() })
             <div class="flex justify-between"><span class="text-gray-500">Status</span><span class="text-gray-200" :class="statusColor((selectedItem as any).status)">{{ statusLabel((selectedItem as any).status) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Latitude</span><span class="text-gray-200 font-mono">{{ fmtCoord((selectedItem as any).lat, (selectedItem as any).lng) }}</span></div>
             <div class="flex justify-between"><span class="text-gray-500">Longitude</span><span class="text-gray-200 font-mono">{{ (selectedItem as any).lng.toFixed(6) }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Last Seen</span><span class="text-gray-200">{{ fmtTime((selectedItem as any).updatedAt) }}</span></div>
-            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Metrics (recent 40s)</div>
+            <div class="flex justify-between"><span class="text-gray-500">Last Seen</span></div>
+            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Sensors</div>
+            <div v-if="selectedTelemetry" class="grid grid-cols-2 gap-2">
+              <div class="flex justify-between bg-gray-900 rounded px-2 py-1"><span class="text-gray-500">Pitch</span><span class="text-gray-200">{{ fmtAttitude(selectedTelemetry.pitch) }}</span></div>
+              <div class="flex justify-between bg-gray-900 rounded px-2 py-1"><span class="text-gray-500">Roll</span><span class="text-gray-200">{{ fmtAttitude(selectedTelemetry.roll) }}</span></div>
+              <div class="flex justify-between bg-gray-900 rounded px-2 py-1"><span class="text-gray-500">Yaw</span><span class="text-gray-200">{{ fmtAttitude(selectedTelemetry.yaw) }}</span></div>
+              <div class="flex justify-between bg-gray-900 rounded px-2 py-1"><span class="text-gray-500">Signal</span><span class="text-gray-200">{{ fmtSignal(selectedTelemetry.signal_strength) }}</span></div>
+            </div>
+            <div v-else class="text-xs text-gray-600">Waiting for data...</div>            <div class="text-gray-500 text-xs pt-2 border-t border-gray-800">Metrics (recent 40s)</div>
             <div class="grid grid-cols-2 grid-rows-2 gap-2" style="min-height: 300px">
               <div v-for="(item, idx) in [{ title: 'Alt', data: chartData.altitude, color: '#22d3ee' }, { title: 'Speed', data: chartData.speed, color: '#34d399' }, { title: 'Battery', data: chartData.battery, color: '#fbbf24' }, { title: 'Heading', data: chartData.heading, color: '#f472b6' }]" :key="idx" class="bg-gray-900 rounded p-1.5 flex flex-col">
                 <div class="text-[10px] text-gray-500 mb-0.5">{{ item.title }}</div>
@@ -216,3 +228,5 @@ onUnmounted(() => { telemetry.stop() })
 .slide-enter-active, .slide-leave-active { transition: width 0.2s ease, opacity 0.2s ease; }
 .slide-enter-from, .slide-leave-to { width: 0 !important; opacity: 0; overflow: hidden; }
 </style>
+
+
