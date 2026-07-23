@@ -80,6 +80,7 @@ function onPointerMove(e: PointerEvent) {
         v-if="ui.streamId"
         class="absolute z-20 left-1/2 top-1/2"
         :style="overlayStyle(ui.streamPos, '50%')"
+        @click.stop
       >
         <FloatingStream :stream-id="ui.streamId" :on-grab="streamDrag.onGrab" @close="ui.closeStream()" @select="ui.openStream" />
       </div>
