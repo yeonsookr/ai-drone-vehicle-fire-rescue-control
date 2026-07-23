@@ -40,14 +40,25 @@ public class AiDetectionService {
             log.info("Created uploads/detections directory: {}", created);
         }
 
-        // 2. Generate unique filename
+        // 2. Validate file extension against allowlist (Stored XSS & Malicious upload prevention)
         String originalFilename = file.getOriginalFilename();
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        } else {
-            extension = ".jpg"; // fallback extension
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new IllegalArgumentException("Invalid file name: missing file extension");
         }
+
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+        if (!java.util.List.of(".jpg", ".jpeg", ".png").contains(extension)) {
+            throw new IllegalArgumentException("Security Violation: Only .jpg, .jpeg, and .png image files are allowed. Received: " + extension);
+        }
+
+        // 2-1. Validate declared Content-Type
+        String contentType = file.getContentType();
+        if (contentType == null || !java.util.List.of("image/jpeg", "image/png").contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("Security Violation: Content-Type must be image/jpeg or image/png. Received: " + contentType);
+        }
+
+        // 2-2. Validate actual file content via magic bytes (extension/Content-Type spoofing prevention)
+        validateImageMagicBytes(file);
         
         String eventId = "det-" + UUID.randomUUID().toString();
         String newFilename = eventId + extension;
@@ -111,5 +122,27 @@ public class AiDetectionService {
         AiDetection saved = aiDetectionRepository.save(detection);
         platformForwardingService.sendAiDetectionEvent(saved);
         return saved;
+    }
+
+    /**
+     * 파일의 실제 내용이 JPEG(FF D8 FF) 또는 PNG(89 50 4E 47)인지 매직바이트로 검증한다.
+     * 확장자/Content-Type만 이미지로 위장한 악성 파일 업로드를 차단한다.
+     */
+    private void validateImageMagicBytes(MultipartFile file) throws IOException {
+        byte[] header = new byte[4];
+        try (java.io.InputStream is = file.getInputStream()) {
+            int read = is.read(header);
+            if (read < 4) {
+                throw new IllegalArgumentException("Security Violation: File is too small to be a valid image.");
+            }
+        }
+
+        boolean isJpeg = (header[0] & 0xFF) == 0xFF && (header[1] & 0xFF) == 0xD8 && (header[2] & 0xFF) == 0xFF;
+        boolean isPng = (header[0] & 0xFF) == 0x89 && (header[1] & 0xFF) == 0x50
+                && (header[2] & 0xFF) == 0x4E && (header[3] & 0xFF) == 0x47;
+
+        if (!isJpeg && !isPng) {
+            throw new IllegalArgumentException("Security Violation: File content is not a valid JPEG/PNG image.");
+        }
     }
 }
