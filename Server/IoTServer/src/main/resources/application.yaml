@@ -1,6 +1,9 @@
 server:
   port: 8080
 
+app:
+  platform-server-url: http://localhost:8081
+
 spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
