@@ -6,19 +6,21 @@ export function useDrag(pos: Ref<OverlayPos | null>) {
   let startMouse = { x: 0, y: 0 }
   let startPos = { x: 0, y: 0 }
 
+  /** Call from the drag handle's @pointerdown */
   function onGrab(e: PointerEvent) {
+    // Only respond to primary button (left click)
+    if (e.button !== 0) return
     dragging = true
     startMouse = { x: e.clientX, y: e.clientY }
     if (pos.value) {
       startPos = { ...pos.value }
     } else {
-      // First drag: convert viewport coords to containing-block coords
       const el = e.currentTarget as HTMLElement
-      const r = el.getBoundingClientRect()
-      const parent = el.offsetParent as HTMLElement
-      const pr = parent.getBoundingClientRect()
-      startPos = { x: r.left - pr.left, y: r.top - pr.top }
-      pos.value = { x: r.left - pr.left, y: r.top - pr.top }
+      const container = (el.offsetParent ?? el.parentElement) as HTMLElement
+      const cr = container.getBoundingClientRect()
+      const er = el.getBoundingClientRect()
+      // Position the overlay so the handle stays under the cursor
+      startPos = { x: er.left - cr.left, y: er.top - cr.top }
     }
     e.preventDefault()
   }
