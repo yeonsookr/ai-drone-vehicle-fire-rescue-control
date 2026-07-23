@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useDeviceService } from '@/services/deviceService'
+import { useUiStore } from '@/stores/ui'
 import { Plane, Satellite, Wifi, WifiOff } from '@lucide/vue'
 import OverlayPanel from '@/components/OverlayPanel.vue'
 import PanelSection from '@/components/PanelSection.vue'
 
-const router = useRouter()
+const ui = useUiStore()
 
 const device = useDeviceService()
 const filter = ref<'all' | 'drone' | 'vehicle'>('all')
@@ -35,7 +35,7 @@ function signalColor(s: number) { return s > -75 ? 'text-green-400' : s > -85 ? 
 
     <div v-if="filteredCards.length === 0" class="flex items-center justify-center h-20 text-gray-600 text-xs">Waiting for telemetry...</div>
     <div v-else class="grid grid-cols-2 gap-2">
-      <div v-for="card in filteredCards" :key="card.id" @click="router.push({ query: { detail: card.id } })"
+      <div v-for="card in filteredCards" :key="card.id" @click="ui.toggleDetail(card.id)"
         class="bg-gray-900/80 rounded-lg border px-3 py-2 cursor-pointer transition-colors hover:border-gray-600"
         :class="[card.stale ? 'opacity-60' : 'border-gray-700']">
         <div class="flex items-center gap-2 mb-1.5">
