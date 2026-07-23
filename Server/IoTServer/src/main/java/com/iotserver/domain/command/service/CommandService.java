@@ -35,14 +35,23 @@ public class CommandService {
 
     @Transactional
     public Command executeCommand(CommandRequestDto dto) {
+        if (dto.getTargetType() == null || dto.getTargetType().isBlank() ||
+            dto.getTargetId() == null || dto.getTargetId().isBlank() ||
+            dto.getType() == null || dto.getType().isBlank()) {
+            throw new IllegalArgumentException("Invalid Command: targetType, targetId, and type must not be blank.");
+        }
+
         Mission mission = null;
         if (dto.getMissionId() != null && !dto.getMissionId().isBlank()) {
-            mission = missionRepository.findById(dto.getMissionId()).orElse(null);
+            mission = missionRepository.findById(dto.getMissionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Mission not found with ID: " + dto.getMissionId()));
         }
 
         User operator = null;
-        Integer opId = dto.getOperatorId() != null ? dto.getOperatorId().intValue() : 1;
-        operator = userRepository.findById(opId).orElse(null);
+        if (dto.getOperatorId() != null) {
+            operator = userRepository.findById(dto.getOperatorId().intValue())
+                    .orElseThrow(() -> new IllegalArgumentException("Operator not found with ID: " + dto.getOperatorId()));
+        }
 
         String commandId = "cmd-" + UUID.randomUUID().toString();
         Map<String, Object> parameters = dto.getParameters() != null ? dto.getParameters() : new HashMap<>();
