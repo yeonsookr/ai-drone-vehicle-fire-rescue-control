@@ -17,9 +17,13 @@ const streamDrag = useDrag(toRef(ui, 'streamPos'))
 const detailDrag = useDrag(toRef(ui, 'detailPos'))
 const missionDrag = useDrag(toRef(ui, 'missionPos'))
 
-function posStyle(pos: { x: number; y: number } | null): Record<string, string> {
+function centerPos(pos: { x: number; y: number } | null): Record<string, string> {
   if (!pos) return {}
-  return { left: `${pos.x}px`, top: `${pos.y}px`, transform: 'none', translate: 'none' as string }
+  return { left: '50%', top: '50%', transform: `translate(-50%, -50%) translate(${pos.x}px, ${pos.y}px)` }
+}
+function rightPos(pos: { x: number; y: number } | null): Record<string, string> {
+  if (!pos) return {}
+  return { right: '1rem', top: '50%', transform: `translate(0, -50%) translate(${pos.x}px, ${pos.y}px)` }
 }
 
 function onPointerMove(e: PointerEvent) {
@@ -64,9 +68,8 @@ function onPointerUp() {
       <div
         v-if="ui.streamId"
         class="absolute z-20"
-        :class="ui.streamPos ? '' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'"
-        :style="posStyle(ui.streamPos)"
-        @click.stop
+        :class="ui.streamPos ? 'left-1/2 top-1/2' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'"
+        :style="centerPos(ui.streamPos)"
       >
         <FloatingStream :stream-id="ui.streamId" :on-grab="streamDrag.onGrab" @close="ui.closeStream()" @select="ui.openStream" />
       </div>
@@ -76,7 +79,7 @@ function onPointerUp() {
         v-if="ui.detailDeviceId"
         class="absolute z-30 h-11/12"
         :class="ui.detailPos ? '' : 'top-4 right-4'"
-        :style="posStyle(ui.detailPos)"
+        :style="rightPos(ui.detailPos)"
         @click.stop
       >
         <FloatingDetail :device-id="ui.detailDeviceId" :on-grab="detailDrag.onGrab" @close="ui.closeDetail()" />
@@ -85,7 +88,7 @@ function onPointerUp() {
         v-if="ui.missionId"
         class="absolute z-30 h-11/12"
         :class="ui.missionPos ? '' : 'top-4 right-4'"
-        :style="posStyle(ui.missionPos)"
+        :style="rightPos(ui.missionPos)"
         @click.stop
       >
         <FloatingMissionDetail :mission-id="ui.missionId" :on-grab="missionDrag.onGrab" @close="ui.closeMission()" />
