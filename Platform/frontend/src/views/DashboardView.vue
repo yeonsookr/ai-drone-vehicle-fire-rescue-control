@@ -17,10 +17,10 @@ const video = useVideoStream()
         <div
           v-for="s in streamSvc.all" :key="s.id"
           @click="ui.openStream(s.id)"
-          class="aspect-video bg-gray-900/80 rounded border border-gray-700 flex items-center justify-center text-xs text-gray-600 relative overflow-hidden min-w-24 cursor-pointer transition-colors hover:border-gray-500"
+          class="aspect-video bg-gray-900/80 rounded border border-gray-700 relative overflow-hidden min-w-24 cursor-pointer transition-colors hover:border-gray-500"
         >
           <MediaFeed :src="video.getUrl(s.device_id)" class="absolute inset-0" />
-          <span class="relative z-10 bg-black/40 px-1 rounded text-[10px]">{{ s.device_id }}</span>
+          <span class="absolute top-1 left-1 z-10 bg-black/60 px-1 rounded text-[9px] text-gray-300">{{ s.device_id }}</span>
         </div>
       </div>
     </OverlayPanel>
