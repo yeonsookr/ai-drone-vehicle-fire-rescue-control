@@ -7,6 +7,7 @@ const router = createRouter({
     { path: '/dashboard', name: 'Dashboard', component: () => import('@/views/DashboardView.vue') },
     { path: '/missions', name: 'Missions', component: () => import('@/views/MissionsView.vue') },
     { path: '/telemetry', name: 'Telemetry', component: () => import('@/views/TelemetryView.vue') },
+    { path: '/devices', name: 'DeviceManagement', component: () => import('@/views/DeviceManagementView.vue') },
     { path: '/system/settings', name: 'SystemSettings', component: () => import('@/views/SystemSettingsView.vue') },
   ],
 })
