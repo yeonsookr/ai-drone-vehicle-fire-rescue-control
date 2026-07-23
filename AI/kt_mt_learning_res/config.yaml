@@ -1,0 +1,15 @@
+model: best.pt
+engine: best.engine
+source: 0
+imgsz: 1280
+confidence: 0.25
+iou: 0.70
+device: 0
+
+classes:
+  0: fire
+  1: smoke
+
+event_type_mapping:
+  fire: forest_fire
+  smoke: smoke
