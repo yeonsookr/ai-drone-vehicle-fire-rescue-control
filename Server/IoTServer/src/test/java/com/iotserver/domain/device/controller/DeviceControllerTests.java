@@ -2,6 +2,7 @@ package com.iotserver.domain.device.controller;
 
 import com.iotserver.domain.device.entity.Drone;
 import com.iotserver.domain.device.entity.Gateway;
+import com.iotserver.domain.device.entity.Vehicle;
 import com.iotserver.domain.device.service.DeviceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,5 +86,30 @@ public class DeviceControllerTests {
                 .andExpect(jsonPath("$[0].name", is("Test Gateway")))
                 .andExpect(jsonPath("$[0].status", is("online")))
                 .andExpect(jsonPath("$[0].ip_address", is("192.168.0.1")));
+    }
+
+    @Test
+    public void testGetVehicles_SuccessAndSnakeCase() throws Exception {
+        Vehicle vehicle = Vehicle.builder()
+                .id("V-01")
+                .name("Test Vehicle")
+                .status("active")
+                .batteryLevel(new BigDecimal("90.00"))
+                .currentLat(37.5281)
+                .currentLng(127.0293)
+                .build();
+
+        Mockito.when(deviceService.getAllVehicles()).thenReturn(List.of(vehicle));
+
+        mockMvc.perform(get("/api/vehicles")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is("V-01")))
+                .andExpect(jsonPath("$[0].name", is("Test Vehicle")))
+                .andExpect(jsonPath("$[0].status", is("active")))
+                .andExpect(jsonPath("$[0].battery_level", is(90.00)))
+                .andExpect(jsonPath("$[0].current_lat", is(37.5281)))
+                .andExpect(jsonPath("$[0].current_lng", is(127.0293)));
     }
 }
