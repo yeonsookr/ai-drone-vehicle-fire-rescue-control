@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
-@Tag(name = "BFF - Gateway")
+@Tag(name = "BFF - Gateway (=Vehicle)")
 @RestController
 @RequestMapping("/api/gateways")
 public class GatewayController {
@@ -21,7 +21,7 @@ public class GatewayController {
         this.central = centralRestClient;
     }
 
-    @Operation(summary = "게이트웨이 목록 조회")
+    @Operation(summary = "게이트웨이 목록 조회 (MQTT 자동 등록)")
     @GetMapping
     public List<GatewayDto> list() {
         var res = central.get().uri("/api/gateways").retrieve().body(GatewayDto[].class);
