@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { streamApi } from '@/lib/api/streams'
 import { useUiStore } from '@/stores/ui'
+import { useStreamService } from '@/services/streamService'
 import OverlayPanel from '@/components/OverlayPanel.vue'
-import type { VideoStream } from '@/types'
 
 const ui = useUiStore()
-const streams = ref<VideoStream[]>([])
-const droneStreams = computed(() => streams.value.filter(s => s.device_type === 'drone'))
-
-streamApi.list().then(res => { streams.value = res.data })
+const streamSvc = useStreamService()
 </script>
 
 <template>
@@ -17,7 +12,7 @@ streamApi.list().then(res => { streams.value = res.data })
     <OverlayPanel>
       <div class="flex-1 grid grid-cols-2 auto-rows-min gap-2 content-start" style="min-height: 200px">
         <div
-          v-for="s in droneStreams" :key="s.id"
+          v-for="s in streamSvc.all" :key="s.id"
           @click="ui.openStream(s.id)"
           class="aspect-video bg-gray-900/80 rounded border border-gray-700 flex items-center justify-center text-xs text-gray-600 relative overflow-hidden min-w-24 cursor-pointer transition-colors"
           :class="s.status === 'streaming' ? 'hover:border-gray-500 hover:bg-gray-900/60' : 'opacity-50'"

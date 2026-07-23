@@ -2,19 +2,16 @@
 import { ref, computed } from 'vue'
 import { X, Plane, MapPin, Clock, CameraOff, Wifi, Maximize2, Minimize2 } from '@lucide/vue'
 import { useTelemetryService } from '@/services/telemetryService'
-import { streamApi } from '@/lib/api/streams'
-import type { VideoStream } from '@/types'
+import { useStreamService } from '@/services/streamService'
 
 const props = defineProps<{ streamId: number; onGrab?: (e: PointerEvent) => void }>()
 const emit = defineEmits<{ close: []; select: [id: number] }>()
 
 const telemetry = useTelemetryService()
+const streamSvc = useStreamService()
 const expanded = ref(false)
 
-const streams = ref<VideoStream[]>([])
-streamApi.list().then(res => { streams.value = res.data })
-
-const current = computed(() => streams.value.find(s => s.id === props.streamId) ?? null)
+const current = computed(() => streamSvc.ofId(props.streamId))
 
 // Domain: drone is camera source, vehicle relays drone video to server
 // Mock relay path: DRONE-001/002 → VEH-001, DRONE-003/004 → VEH-002
@@ -31,7 +28,7 @@ const t = computed(() => {
   return telemetry.latestOf(current.value.device_id) ?? null
 })
 
-const available = computed(() => streams.value.filter(s => s.device_type === 'drone' && s.status === 'streaming'))
+const available = computed(() => streamSvc.active)
 </script>
 
 <template>
@@ -71,7 +68,7 @@ const available = computed(() => streams.value.filter(s => s.device_type === 'dr
       </div>
 
       <!-- Info bar -->
-      <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-2">
+      <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent px-3 py-2">
         <div class="flex items-center gap-4 text-[10px] text-gray-200">
           <span class="flex items-center gap-1"><MapPin class="w-3 h-3 text-gray-400" />{{ t ? `${t.latitude.toFixed(4)}, ${t.longitude.toFixed(4)}` : '--' }}</span>
           <span class="flex items-center gap-1"><Clock class="w-3 h-3 text-gray-400" />{{ t ? new Date(t.recorded_at).toLocaleTimeString() : '--' }}</span>
