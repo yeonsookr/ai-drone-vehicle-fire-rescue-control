@@ -2,6 +2,7 @@ package com.iotserver.domain.device.controller;
 
 import com.iotserver.domain.device.entity.Drone;
 import com.iotserver.domain.device.entity.Gateway;
+import com.iotserver.domain.device.entity.Vehicle;
 import com.iotserver.domain.device.service.DeviceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,11 @@ public class DeviceController {
     public ResponseEntity<List<Gateway>> getGateways() {
         List<Gateway> gateways = deviceService.getAllGateways();
         return ResponseEntity.ok(gateways);
+    }
+
+    @GetMapping("/vehicles")
+    public ResponseEntity<List<Vehicle>> getVehicles() {
+        List<Vehicle> vehicles = deviceService.getAllVehicles();
+        return ResponseEntity.ok(vehicles);
     }
 }
