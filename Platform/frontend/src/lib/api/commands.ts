@@ -1,3 +1,4 @@
+import api from '@/lib/api'
 import type { Command } from '@/types'
 
 const MOCK_COMMANDS: Command[] = [
@@ -17,4 +18,7 @@ export const commandApi = {
     const c = MOCK_COMMANDS.find(c => c.id === id)
     return Promise.resolve({ data: c!, status: 200, statusText: 'OK', headers: {}, config: {} as any })
   },
+  send: (body: { target_type: string; target_id: string; type: string; parameters?: any; expires_sec?: number }) =>
+    api.post('/api/commands', body).then(r => r.data),
+
 }
