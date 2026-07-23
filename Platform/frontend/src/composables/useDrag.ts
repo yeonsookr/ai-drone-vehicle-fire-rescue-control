@@ -9,7 +9,17 @@ export function useDrag(pos: Ref<OverlayPos | null>) {
   function onGrab(e: PointerEvent) {
     dragging = true
     startMouse = { x: e.clientX, y: e.clientY }
-    startPos = pos.value ?? { x: 0, y: 0 }
+    if (pos.value) {
+      startPos = { ...pos.value }
+    } else {
+      // First drag: convert viewport coords to containing-block coords
+      const el = e.currentTarget as HTMLElement
+      const r = el.getBoundingClientRect()
+      const parent = el.offsetParent as HTMLElement
+      const pr = parent.getBoundingClientRect()
+      startPos = { x: r.left - pr.left, y: r.top - pr.top }
+      pos.value = { x: r.left - pr.left, y: r.top - pr.top }
+    }
     e.preventDefault()
   }
 

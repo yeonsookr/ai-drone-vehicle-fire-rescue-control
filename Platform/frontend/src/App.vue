@@ -60,39 +60,50 @@ function onPointerUp() {
     <main class="flex-1 relative min-h-0">
       <MapPanel class="absolute inset-0" />
 
-      <!-- Section 2: Camera stream (draggable, defaults to center) -->
+      <!-- Section 2: Camera stream (draggable via title bar) -->
       <div
         v-if="ui.streamId"
-        class="absolute z-20 cursor-grab active:cursor-grabbing"
+        class="absolute z-20"
         :class="ui.streamPos ? '' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'"
         :style="posStyle(ui.streamPos)"
         @click.stop
-        @pointerdown="streamDrag.onGrab"
       >
-        <FloatingStream :stream-id="ui.streamId" @close="ui.closeStream()" @select="ui.openStream" />
+        <div class="relative">
+          <div class="absolute inset-x-0 top-0 h-8 z-10 cursor-grab active:cursor-grabbing rounded-t-lg" @pointerdown="streamDrag.onGrab"></div>
+          <FloatingStream :stream-id="ui.streamId" @close="ui.closeStream()" @select="ui.openStream" />
+        </div>
       </div>
 
-      <!-- Section 3: Detail overlays (draggable, defaults to right) -->
+      <!-- Section 3: Detail overlays (draggable via title bar) -->
       <div
         v-if="ui.detailDeviceId"
-        class="absolute z-30 cursor-grab active:cursor-grabbing h-11/12"
+        class="absolute z-30 h-11/12"
         :class="ui.detailPos ? '' : 'top-4 right-4'"
         :style="posStyle(ui.detailPos)"
         @click.stop
-        @pointerdown="detailDrag.onGrab"
       >
-        <FloatingDetail :device-id="ui.detailDeviceId" @close="ui.closeDetail()" />
+        <div class="relative h-full">
+          <div class="absolute inset-x-0 top-0 h-8 z-10 cursor-grab active:cursor-grabbing rounded-t-lg" @pointerdown="detailDrag.onGrab"></div>
+          <FloatingDetail :device-id="ui.detailDeviceId" @close="ui.closeDetail()" />
+        </div>
       </div>
       <div
         v-if="ui.missionId"
-        class="absolute z-30 cursor-grab active:cursor-grabbing h-11/12"
+        class="absolute z-30 h-11/12"
         :class="ui.missionPos ? '' : 'top-4 right-4'"
         :style="posStyle(ui.missionPos)"
         @click.stop
-        @pointerdown="missionDrag.onGrab"
       >
-        <FloatingMissionDetail :mission-id="ui.missionId" @close="ui.closeMission()" />
+        <div class="relative h-full">
+          <div class="absolute inset-x-0 top-0 h-8 z-10 cursor-grab active:cursor-grabbing rounded-t-lg" @pointerdown="missionDrag.onGrab"></div>
+          <FloatingMissionDetail :mission-id="ui.missionId" @close="ui.closeMission()" />
+        </div>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.cursor-grab * { cursor: inherit }
+.cursor-grabbing * { cursor: inherit }
+</style>
