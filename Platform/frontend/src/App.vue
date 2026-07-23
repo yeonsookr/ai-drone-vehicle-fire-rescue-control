@@ -33,8 +33,8 @@ const connected = computed(() => telemetry.connected)
     <main class="flex-1 relative min-h-0">
       <MapPanel class="absolute inset-0" />
 
-      <!-- Section 2 (Center): Camera stream overlay -->
-      <div v-if="ui.streamId" class="absolute z-20" style="left: calc(20rem + 1.5rem); top: 1rem" @click.stop>
+      <!-- Section 2: Camera stream (centered, large) -->
+      <div v-if="ui.streamId" class="absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" @click.stop>
         <FloatingStream
           :stream-id="ui.streamId"
           @close="ui.closeStream()"
@@ -42,11 +42,11 @@ const connected = computed(() => telemetry.connected)
         />
       </div>
 
-      <!-- Section 3 (Right): Detail overlays -->
-      <div v-if="ui.detailDeviceId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
+      <!-- Section 3: Detail overlays (right side, overlap OK) -->
+      <div v-if="ui.detailDeviceId" class="absolute z-30 top-4 right-4 h-11/12" @click.stop>
         <FloatingDetail :device-id="ui.detailDeviceId" @close="ui.closeDetail()" />
       </div>
-      <div v-if="ui.missionId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
+      <div v-if="ui.missionId" class="absolute z-30 top-4 right-4 h-11/12" @click.stop>
         <FloatingMissionDetail :mission-id="ui.missionId" @close="ui.closeMission()" />
       </div>
     </main>

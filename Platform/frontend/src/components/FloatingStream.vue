@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { X, Plane, MapPin, Clock, CameraOff, Wifi } from '@lucide/vue'
+import { X, Plane, MapPin, Clock, CameraOff, Wifi, Maximize2, Minimize2 } from '@lucide/vue'
 import { useTelemetryService } from '@/services/telemetryService'
 import { streamApi } from '@/lib/api/streams'
 import type { VideoStream } from '@/types'
@@ -9,6 +9,7 @@ const props = defineProps<{ streamId: number }>()
 const emit = defineEmits<{ close: []; select: [id: number] }>()
 
 const telemetry = useTelemetryService()
+const expanded = ref(false)
 
 const streams = ref<VideoStream[]>([])
 streamApi.list().then(res => { streams.value = res.data })
@@ -34,7 +35,7 @@ const available = computed(() => streams.value.filter(s => s.device_type === 'dr
 </script>
 
 <template>
-  <div class="w-[560px] bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden">
+  <div :class="expanded ? 'w-240' : 'w-160'" class="bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden">
     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700">
       <div class="flex items-center gap-2">
         <Plane class="w-4 h-4 text-cyan-400" />
@@ -42,7 +43,12 @@ const available = computed(() => streams.value.filter(s => s.device_type === 'dr
         <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400">drone cam</span>
         <span v-if="current?.status === 'streaming'" class="text-[10px] text-green-400">LIVE</span>
       </div>
-      <button @click="emit('close')" class="text-gray-500 hover:text-gray-300"><X class="w-4 h-4" /></button>
+      <div class="flex items-center gap-1">
+        <button @click="expanded = !expanded" class="text-gray-500 hover:text-gray-300 p-1" :title="expanded ? 'Collapse' : 'Expand'">
+          <Maximize2 v-if="!expanded" class="w-3.5 h-3.5" /><Minimize2 v-else class="w-3.5 h-3.5" />
+        </button>
+        <button @click="emit('close')" class="text-gray-500 hover:text-gray-300 p-1"><X class="w-4 h-4" /></button>
+      </div>
     </div>
 
     <!-- Video area -->
