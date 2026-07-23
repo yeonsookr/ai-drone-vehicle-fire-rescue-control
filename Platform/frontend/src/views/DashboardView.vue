@@ -2,9 +2,12 @@
 import { useUiStore } from '@/stores/ui'
 import { useStreamService } from '@/services/streamService'
 import OverlayPanel from '@/components/OverlayPanel.vue'
+import MediaFeed from '@/components/MediaFeed.vue'
+import { useVideoStream } from '@/composables/useVideoStream'
 
 const ui = useUiStore()
 const streamSvc = useStreamService()
+const video = useVideoStream()
 </script>
 
 <template>
@@ -14,12 +17,10 @@ const streamSvc = useStreamService()
         <div
           v-for="s in streamSvc.all" :key="s.id"
           @click="ui.openStream(s.id)"
-          class="aspect-video bg-gray-900/80 rounded border border-gray-700 flex items-center justify-center text-xs text-gray-600 relative overflow-hidden min-w-24 cursor-pointer transition-colors"
-          :class="s.status === 'streaming' ? 'hover:border-gray-500 hover:bg-gray-900/60' : 'opacity-50'"
-          :style="s.id === 1 ? 'border-color: rgb(156 163 175)' : ''"
+          class="aspect-video bg-gray-900/80 rounded border border-gray-700 flex items-center justify-center text-xs text-gray-600 relative overflow-hidden min-w-24 cursor-pointer transition-colors hover:border-gray-500"
         >
-          <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 75"><line x1="0" y1="0" x2="100" y2="75" stroke="currentColor" stroke-width="0.3" class="text-gray-700"/><line x1="100" y1="0" x2="0" y2="75" stroke="currentColor" stroke-width="0.3" class="text-gray-700"/></svg>
-          <span class="relative z-10">{{ s.device_id }}</span>
+          <MediaFeed :src="video.getUrl(s.device_id)" class="absolute inset-0" />
+          <span class="relative z-10 bg-black/40 px-1 rounded text-[10px]">{{ s.device_id }}</span>
         </div>
       </div>
     </OverlayPanel>
