@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMissionService } from '@/services'
+import { useUiStore } from '@/stores/ui'
 import { fmtTime } from '@/lib/format'
 import { MapIcon, Plane, Satellite } from '@lucide/vue'
 import OverlayPanel from '@/components/OverlayPanel.vue'
 import PanelSection from '@/components/PanelSection.vue'
 
-const router = useRouter()
+const ui = useUiStore()
 const ms = useMissionService()
 
 onMounted(() => ms.fetch())
@@ -30,7 +30,7 @@ const statusColor: Record<string, string> = {
     <div v-else class="space-y-2">
       <div
         v-for="m in ms.missions" :key="m.id"
-        @click="router.push({ query: { mission: m.id } })"
+        @click="ui.toggleMission(m.id)"
         class="flex items-center gap-3 px-3 py-2 bg-gray-900/80 rounded-lg border border-gray-700 cursor-pointer transition-colors hover:border-gray-600"
       >
         <MapIcon class="w-4 h-4 text-gray-400 shrink-0" />
