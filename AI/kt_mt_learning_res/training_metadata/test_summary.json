@@ -1,0 +1,25 @@
+{
+  "weights": "C:\\Users\\SSAFY\\Desktop\\MVP전처리학습\\yolo26_runs\\kr_yolo26n_real_v3_1280_group_freeze11\\weights\\best.pt",
+  "results_dict": {
+    "metrics/precision(B)": 0.6605564336426644,
+    "metrics/recall(B)": 0.4652014652014652,
+    "metrics/mAP50(B)": 0.5419400262241579,
+    "metrics/mAP50-95(B)": 0.28907887177766367,
+    "fitness": 0.28907887177766367
+  },
+  "speed_ms_per_image": {
+    "preprocess": 3.1549400000325734,
+    "inference": 10.96194142870185,
+    "loss": 0.00519142860347139,
+    "postprocess": 0.39160928572528064
+  },
+  "box": {
+    "map50_95": 0.28907887177766367,
+    "map50": 0.5419400262241579,
+    "map75": 0.2711116446895504,
+    "per_class_map50_95": [
+      0.45038426454815805,
+      0.12777347900716923
+    ]
+  }
+}
