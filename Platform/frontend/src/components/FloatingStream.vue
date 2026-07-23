@@ -62,11 +62,6 @@ const available = computed(() => streamSvc.active)
         <span class="absolute text-gray-600 text-xs">Live feed — {{ current.device_id }}</span>
       </div>
 
-      <!-- AI mock overlay -->
-      <div v-if="current?.status === 'streaming'" class="absolute top-1/3 left-1/3 border-2 border-red-500/80 rounded" style="width: 140px; height: 90px">
-        <span class="absolute -top-4 left-0 text-[9px] bg-red-500/80 text-white px-1 rounded-t">Fire 0.87</span>
-      </div>
-
       <!-- Info bar -->
       <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent px-3 py-2">
         <div class="flex items-center gap-4 text-[10px] text-gray-200">
