@@ -4,6 +4,7 @@ import { X, Plane, MapPin, Clock, CameraOff, Wifi, Maximize2, Minimize2 } from '
 import { useTelemetryService } from '@/services/telemetryService'
 import { useStreamService } from '@/services/streamService'
 import { useVideoStream } from '@/composables/useVideoStream'
+import MediaFeed from '@/components/MediaFeed.vue'
 
 const props = defineProps<{ streamId: number; onGrab?: (e: PointerEvent) => void }>()
 const emit = defineEmits<{ close: []; select: [id: number] }>()
@@ -56,7 +57,7 @@ const available = computed(() => streamSvc.active)
         <CameraOff class="w-8 h-8" />
         <span>No video from {{ current?.device_id ?? 'drone' }}</span>
       </div>
-      <img v-else :src="video.getUrl(current?.device_id)" class="absolute inset-0 w-full h-full object-cover" alt="Live feed" />
+      <MediaFeed v-else :src="video.getUrl(current?.device_id)" class="absolute inset-0" />
 
       <!-- Info bar -->
       <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent px-3 py-2">
