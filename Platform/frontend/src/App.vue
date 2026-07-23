@@ -1,30 +1,63 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, toRef } from 'vue'
 import { useTelemetryService } from '@/services/telemetryService'
+import { useUiStore } from '@/stores/ui'
+import { useDrag } from '@/composables/useDrag'
 import Sidebar from '@/components/Sidebar.vue'
 import MapPanel from '@/components/MapPanel.vue'
 import FloatingDetail from '@/components/FloatingDetail.vue'
 import FloatingMissionDetail from '@/components/FloatingMissionDetail.vue'
+import FloatingStream from '@/components/FloatingStream.vue'
 
-const route = useRoute()
-const router = useRouter()
 const telemetry = useTelemetryService()
+const ui = useUiStore()
 const connected = computed(() => telemetry.connected)
 
-const detailId = computed(() => route.query.detail as string | undefined)
-const missionId = computed(() => route.query.mission as string | undefined)
+const streamDrag = useDrag(toRef(ui, 'streamPos'))
+const detailDrag = useDrag(toRef(ui, 'detailPos'))
+const missionDrag = useDrag(toRef(ui, 'missionPos'))
 
-function closeFloating(key: string) {
-  const q = { ...route.query }
-  delete q[key]
-  router.replace({ query: q })
+// Suppress accidental closeAll immediately after a drag ends
+let suppressNextClick = false
+
+function onPointerUp() {
+  if (streamDrag.onRelease() || detailDrag.onRelease() || missionDrag.onRelease()) {
+    suppressNextClick = true
+    setTimeout(() => { suppressNextClick = false }, 200)
+  }
+}
+
+function handleRootClick() {
+  if (suppressNextClick) return
+  ui.closeAll()
+}
+
+// No conditinal classes — always emit the same properties.
+// Only the translate offset changes inside the single transform.
+function overlayStyle(pos: { x: number; y: number } | null, baseLeft: string, baseTop = '50%'): Record<string, string> {
+  const dx = pos?.x ?? 0
+  const dy = pos?.y ?? 0
+  // Center: translate(-50%,-50%) + offset.  Right: no base transform, just offset.
+  const baseT = baseLeft === '50%' ? 'translate(-50%,-50%)' : ''
+  const offsetT = (dx || dy) ? ` translate(${dx}px,${dy}px)` : ''
+  return { left: baseLeft, top: baseTop, transform: (baseT + offsetT).trim() || 'none' }
+}
+
+function onPointerMove(e: PointerEvent) {
+  streamDrag.onMove(e)
+  detailDrag.onMove(e)
+  missionDrag.onMove(e)
 }
 </script>
 
 <template>
-  <div class="flex h-screen bg-[#0f0f0f] text-gray-200" @click="closeFloating('detail'); closeFloating('mission')">
-    <!-- Left panel -->
+  <div
+    class="flex h-screen bg-[#0f0f0f] text-gray-200"
+    @click="handleRootClick"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+  >
+    <!-- Section 1: Sidebar + Content -->
     <div class="w-80 flex flex-col min-h-0 bg-[#1a1a1a] border-r border-gray-800" @click.stop>
       <div class="h-14 flex items-center justify-between px-4 border-b border-gray-800 shrink-0">
         <span class="text-[11px] font-bold tracking-widest text-gray-500 uppercase">AIoT CTRL</span>
@@ -41,14 +74,35 @@ function closeFloating(key: string) {
     <!-- Map -->
     <main class="flex-1 relative min-h-0">
       <MapPanel class="absolute inset-0" />
-    </main>
 
-    <!-- Floating overlays -->
-    <div v-if="detailId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
-      <FloatingDetail :device-id="detailId" @close="closeFloating('detail')" />
-    </div>
-    <div v-if="missionId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
-      <FloatingMissionDetail :mission-id="missionId" @close="closeFloating('mission')" />
-    </div>
+      <!-- Section 2: Camera stream -->
+      <div
+        v-if="ui.streamId"
+        class="absolute z-20 left-1/2 top-1/2"
+        :style="overlayStyle(ui.streamPos, '50%')"
+        @click.stop
+      >
+        <FloatingStream :stream-id="ui.streamId" :on-grab="streamDrag.onGrab" @close="ui.closeStream()" @select="ui.openStream" />
+      </div>
+
+      <!-- Section 3: Detail overlays -->
+      <div
+        v-if="ui.detailDeviceId"
+        class="absolute z-30 h-11/12 top-4 right-4"
+        :style="overlayStyle(ui.detailPos, 'auto', '1rem')"
+        @click.stop
+      >
+        <FloatingDetail :device-id="ui.detailDeviceId" :on-grab="detailDrag.onGrab" @close="ui.closeDetail()" />
+      </div>
+      <div
+        v-if="ui.missionId"
+        class="absolute z-30 h-11/12"
+        :class="ui.missionPos ? '' : 'top-4 right-4'"
+        :style="overlayStyle(ui.missionPos, 'auto', '1rem')"
+        @click.stop
+      >
+        <FloatingMissionDetail :mission-id="ui.missionId" :on-grab="missionDrag.onGrab" @close="ui.closeMission()" />
+      </div>
+    </main>
   </div>
 </template>

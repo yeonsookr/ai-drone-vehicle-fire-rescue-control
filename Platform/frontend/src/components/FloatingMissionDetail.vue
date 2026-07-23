@@ -4,7 +4,7 @@ import { X, Play, Pause, XCircle, AlertTriangle, CircleCheck, CircleDot } from '
 import { useMissionService } from '@/services'
 import { fmtTime } from '@/lib/format'
 
-const props = defineProps<{ missionId: string }>()
+const props = defineProps<{ missionId: string; onGrab?: (e: PointerEvent) => void }>()
 const emit = defineEmits<{ close: [] }>()
 
 const ms = useMissionService()
@@ -39,12 +39,12 @@ function canCancel(m: { status: string }) { return ['CREATED', 'IN_PROGRESS', 'P
 
 <template>
   <div class="w-96 h-full bg-gray-900/95 backdrop-blur border border-gray-700 rounded-lg shadow-2xl flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700 cursor-grab active:cursor-grabbing" @pointerdown="props.onGrab?.($event)">
       <div class="flex items-center gap-2">
         <span class="text-sm font-semibold text-gray-100">{{ props.missionId }}</span>
         <span v-if="mission" class="text-[10px] px-1.5 py-0.5 rounded" :class="mission.status === 'FAILED' ? 'bg-red-900 text-red-300' : 'bg-gray-800 text-gray-400'">{{ mission.status }}</span>
       </div>
-      <button @click="emit('close')" class="text-gray-500 hover:text-gray-300"><X class="w-4 h-4" /></button>
+      <button @click="emit('close')" @pointerdown.stop class="text-gray-500 hover:text-gray-300"><X class="w-4 h-4" /></button>
     </div>
 
     <!-- Tabs -->
