@@ -17,6 +17,21 @@ const streamDrag = useDrag(toRef(ui, 'streamPos'))
 const detailDrag = useDrag(toRef(ui, 'detailPos'))
 const missionDrag = useDrag(toRef(ui, 'missionPos'))
 
+// Suppress accidental closeAll immediately after a drag ends
+let suppressNextClick = false
+
+function onPointerUp() {
+  if (streamDrag.onRelease() || detailDrag.onRelease() || missionDrag.onRelease()) {
+    suppressNextClick = true
+    setTimeout(() => { suppressNextClick = false }, 200)
+  }
+}
+
+function handleRootClick() {
+  if (suppressNextClick) return
+  ui.closeAll()
+}
+
 function centerPos(pos: { x: number; y: number } | null): Record<string, string> {
   if (!pos) return {}
   return { left: '50%', top: '50%', transform: `translate(-50%, -50%) translate(${pos.x}px, ${pos.y}px)` }
@@ -31,18 +46,12 @@ function onPointerMove(e: PointerEvent) {
   detailDrag.onMove(e)
   missionDrag.onMove(e)
 }
-
-function onPointerUp() {
-  streamDrag.onRelease()
-  detailDrag.onRelease()
-  missionDrag.onRelease()
-}
 </script>
 
 <template>
   <div
     class="flex h-screen bg-[#0f0f0f] text-gray-200"
-    @click="ui.closeAll"
+    @click="handleRootClick"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
   >

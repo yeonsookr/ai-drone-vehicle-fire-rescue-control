@@ -22,8 +22,11 @@ export function useDrag(pos: Ref<OverlayPos | null>) {
     pos.value = { x: dx, y: dy }
   }
 
-  function onRelease() {
+  /** Returns true if a drag was actually in progress */
+  function onRelease(): boolean {
+    const wasDragging = dragging
     dragging = false
+    return wasDragging
   }
 
   return { onGrab, onMove, onRelease }
