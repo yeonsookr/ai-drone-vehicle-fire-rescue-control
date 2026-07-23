@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar.vue'
 import MapPanel from '@/components/MapPanel.vue'
 import FloatingDetail from '@/components/FloatingDetail.vue'
 import FloatingMissionDetail from '@/components/FloatingMissionDetail.vue'
+import FloatingStream from '@/components/FloatingStream.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,16 +15,24 @@ const connected = computed(() => telemetry.connected)
 
 const detailId = computed(() => route.query.detail as string | undefined)
 const missionId = computed(() => route.query.mission as string | undefined)
+const streamId = computed(() => {
+  const v = route.query.stream
+  return v ? Number(v) : undefined
+})
 
 function closeFloating(key: string) {
   const q = { ...route.query }
   delete q[key]
   router.replace({ query: q })
 }
+
+function selectStream(id: number) {
+  router.replace({ query: { ...route.query, stream: id } })
+}
 </script>
 
 <template>
-  <div class="flex h-screen bg-[#0f0f0f] text-gray-200" @click="closeFloating('detail'); closeFloating('mission')">
+  <div class="flex h-screen bg-[#0f0f0f] text-gray-200" @click="closeFloating('detail'); closeFloating('mission'); closeFloating('stream')">
     <!-- Left panel -->
     <div class="w-80 flex flex-col min-h-0 bg-[#1a1a1a] border-r border-gray-800" @click.stop>
       <div class="h-14 flex items-center justify-between px-4 border-b border-gray-800 shrink-0">
@@ -49,6 +58,9 @@ function closeFloating(key: string) {
     </div>
     <div v-if="missionId" class="absolute z-20 top-4 right-4 h-11/12" @click.stop>
       <FloatingMissionDetail :mission-id="missionId" @close="closeFloating('mission')" />
+    </div>
+    <div v-if="streamId" class="absolute z-20 top-4 right-4" @click.stop>
+      <FloatingStream :stream-id="streamId" @close="closeFloating('stream')" @select="selectStream" />
     </div>
   </div>
 </template>
