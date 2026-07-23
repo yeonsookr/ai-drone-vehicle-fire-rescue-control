@@ -32,13 +32,15 @@ function handleRootClick() {
   ui.closeAll()
 }
 
-function centerPos(pos: { x: number; y: number } | null): Record<string, string> {
-  if (!pos) return {}
-  return { left: '50%', top: '50%', transform: `translate(-50%, -50%) translate(${pos.x}px, ${pos.y}px)` }
-}
-function rightPos(pos: { x: number; y: number } | null): Record<string, string> {
-  if (!pos) return {}
-  return { right: '1rem', top: '50%', transform: `translate(0, -50%) translate(${pos.x}px, ${pos.y}px)` }
+// No conditinal classes — always emit the same properties.
+// Only the translate offset changes inside the single transform.
+function overlayStyle(pos: { x: number; y: number } | null, baseLeft: string, baseTop = '50%'): Record<string, string> {
+  const dx = pos?.x ?? 0
+  const dy = pos?.y ?? 0
+  // Center: translate(-50%,-50%) + offset.  Right: no base transform, just offset.
+  const baseT = baseLeft === '50%' ? 'translate(-50%,-50%)' : ''
+  const offsetT = (dx || dy) ? ` translate(${dx}px,${dy}px)` : ''
+  return { left: baseLeft, top: baseTop, transform: (baseT + offsetT).trim() || 'none' }
 }
 
 function onPointerMove(e: PointerEvent) {
@@ -76,9 +78,8 @@ function onPointerMove(e: PointerEvent) {
       <!-- Section 2: Camera stream -->
       <div
         v-if="ui.streamId"
-        class="absolute z-20"
-        :class="ui.streamPos ? 'left-1/2 top-1/2' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'"
-        :style="centerPos(ui.streamPos)"
+        class="absolute z-20 left-1/2 top-1/2"
+        :style="overlayStyle(ui.streamPos, '50%')"
       >
         <FloatingStream :stream-id="ui.streamId" :on-grab="streamDrag.onGrab" @close="ui.closeStream()" @select="ui.openStream" />
       </div>
@@ -86,9 +87,8 @@ function onPointerMove(e: PointerEvent) {
       <!-- Section 3: Detail overlays -->
       <div
         v-if="ui.detailDeviceId"
-        class="absolute z-30 h-11/12"
-        :class="ui.detailPos ? '' : 'top-4 right-4'"
-        :style="rightPos(ui.detailPos)"
+        class="absolute z-30 h-11/12 top-4 right-4"
+        :style="overlayStyle(ui.detailPos, 'auto', '1rem')"
         @click.stop
       >
         <FloatingDetail :device-id="ui.detailDeviceId" :on-grab="detailDrag.onGrab" @close="ui.closeDetail()" />
@@ -97,7 +97,7 @@ function onPointerMove(e: PointerEvent) {
         v-if="ui.missionId"
         class="absolute z-30 h-11/12"
         :class="ui.missionPos ? '' : 'top-4 right-4'"
-        :style="rightPos(ui.missionPos)"
+        :style="overlayStyle(ui.missionPos, 'auto', '1rem')"
         @click.stop
       >
         <FloatingMissionDetail :mission-id="ui.missionId" :on-grab="missionDrag.onGrab" @close="ui.closeMission()" />
