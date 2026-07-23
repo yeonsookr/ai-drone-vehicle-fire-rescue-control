@@ -27,21 +27,8 @@ public class CommandController {
     @Operation(summary = "명령 전송 (proxy to IoTServer)")
     @PostMapping
     public ResponseEntity<Map<String, Object>> send(@Valid @RequestBody CommandRequest req) {
-        try {
-            @SuppressWarnings("unchecked")
-            var res = central.post()
-                .uri("/api/commands")
-                .body(req)
-                .retrieve()
-                .body(Map.class);
-            return ResponseEntity.status(HttpStatus.CREATED).body(res);
-        } catch (Exception e) {
-            return ResponseEntity.ok(Map.of(
-                "mock", true,
-                "message", "Command queued (IoTServer unavailable)",
-                "type", req.type(),
-                "target_id", req.target_id()
-            ));
-        }
+        @SuppressWarnings("unchecked")
+        var res = central.post().uri("/api/commands").body(req).retrieve().body(Map.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 }

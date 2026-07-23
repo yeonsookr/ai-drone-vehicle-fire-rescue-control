@@ -32,11 +32,11 @@ export const useDetectionStore = defineStore('detection', () => {
     selectedId.value = id
   }
 
-  async function judge(id: string, judgment: OperatorJudgment, reason?: string) {
-    const { data } = await detectionApi.judge(id, { judgment, reason })
+  async function judge(id: string, judgment: OperatorJudgment, _reason?: string) {
+    // IoTServer has POST /api/detections/snapshot (edge upload), not judge.
+    // Judge will be implemented when detection query API is available.
     const idx = events.value.findIndex((e) => e.id === id)
-    if (idx !== -1) events.value[idx] = data
-    return data
+    if (idx !== -1) events.value[idx] = { ...events.value[idx], operator_judgment: judgment }
   }
 
   return {
