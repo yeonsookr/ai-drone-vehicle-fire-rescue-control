@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
@@ -7,7 +7,7 @@ spring:
 
 central:
   api:
-    url: http://localhost:9090
+    url: http://localhost:8080
 
   output:
     ansi:
