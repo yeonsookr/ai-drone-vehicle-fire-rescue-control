@@ -3,12 +3,14 @@ import { ref, computed } from 'vue'
 import { X, Plane, MapPin, Clock, CameraOff, Wifi, Maximize2, Minimize2 } from '@lucide/vue'
 import { useTelemetryService } from '@/services/telemetryService'
 import { useStreamService } from '@/services/streamService'
+import { useVideoStream } from '@/composables/useVideoStream'
 
 const props = defineProps<{ streamId: number; onGrab?: (e: PointerEvent) => void }>()
 const emit = defineEmits<{ close: []; select: [id: number] }>()
 
 const telemetry = useTelemetryService()
 const streamSvc = useStreamService()
+const video = useVideoStream()
 const expanded = ref(false)
 
 const current = computed(() => streamSvc.ofId(props.streamId))
@@ -54,13 +56,7 @@ const available = computed(() => streamSvc.active)
         <CameraOff class="w-8 h-8" />
         <span>No video from {{ current?.device_id ?? 'drone' }}</span>
       </div>
-      <div v-else class="absolute inset-0 bg-gray-900 flex items-center justify-center">
-        <svg class="w-full h-full opacity-5" viewBox="0 0 200 120">
-          <line x1="0" y1="0" x2="200" y2="120" stroke="currentColor" stroke-width="0.5"/>
-          <line x1="200" y1="0" x2="0" y2="120" stroke="currentColor" stroke-width="0.5"/>
-        </svg>
-        <span class="absolute text-gray-600 text-xs">Live feed — {{ current.device_id }}</span>
-      </div>
+      <img v-else :src="video.getUrl(current?.device_id)" class="absolute inset-0 w-full h-full object-cover" alt="Live feed" />
 
       <!-- Info bar -->
       <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent px-3 py-2">
