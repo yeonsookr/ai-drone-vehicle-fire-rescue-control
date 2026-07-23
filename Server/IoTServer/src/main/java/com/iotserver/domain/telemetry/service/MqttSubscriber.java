@@ -76,6 +76,11 @@ public class MqttSubscriber {
         try {
             Map<String, Object> map = objectMapper.readValue(payload, Map.class);
             
+            if (map.get("latitude") == null || map.get("longitude") == null) {
+                log.warn("Dropped corrupted drone telemetry for device {}: latitude or longitude missing", droneId);
+                return;
+            }
+
             Drone drone = Drone.builder().id(droneId).build();
             
             DroneTelemetry telemetry = DroneTelemetry.builder()
@@ -104,6 +109,11 @@ public class MqttSubscriber {
     private void processVehicleTelemetry(String vehicleId, String payload) {
         try {
             Map<String, Object> map = objectMapper.readValue(payload, Map.class);
+
+            if (map.get("latitude") == null || map.get("longitude") == null) {
+                log.warn("Dropped corrupted vehicle telemetry for device {}: latitude or longitude missing", vehicleId);
+                return;
+            }
 
             Vehicle vehicle = Vehicle.builder().id(vehicleId).build();
 

@@ -2,9 +2,13 @@ server:
   port: 8080
 
 app:
-  platform-server-url: http://localhost:8081
+  platform-server-url: ${APP_PLATFORM_SERVER_URL:http://localhost:8081}
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
   jackson:
     property-naming-strategy: SNAKE_CASE
   application:
@@ -12,8 +16,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/drone_control?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
-    username: root
-    password: root
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
 
   jpa:
     hibernate:
