@@ -19,6 +19,7 @@ public class TelemetryScheduler {
 
     private final TelemetryQueue telemetryQueue;
     private final JdbcTelemetryRepository jdbcTelemetryRepository;
+    private final com.iotserver.global.service.PlatformForwardingService platformForwardingService;
 
     @Async("telemetryTaskExecutor")
     @Scheduled(fixedDelay = 1000)
@@ -33,6 +34,7 @@ public class TelemetryScheduler {
         try {
             jdbcTelemetryRepository.saveAllVehicleTelemetries(batch);
             log.info("Successfully bulk-inserted {} vehicle telemetries", batch.size());
+            platformForwardingService.sendVehicleTelemetryBatch(batch);
         } catch (Exception e) {
             log.error("Failed to bulk-insert vehicle telemetries. Re-enqueuing to prevent data loss.", e);
             // Rollback: put back into queue
@@ -53,6 +55,7 @@ public class TelemetryScheduler {
         try {
             jdbcTelemetryRepository.saveAllDroneTelemetries(batch);
             log.info("Successfully bulk-inserted {} drone telemetries", batch.size());
+            platformForwardingService.sendDroneTelemetryBatch(batch);
         } catch (Exception e) {
             log.error("Failed to bulk-insert drone telemetries. Re-enqueuing to prevent data loss.", e);
             // Rollback: put back into queue

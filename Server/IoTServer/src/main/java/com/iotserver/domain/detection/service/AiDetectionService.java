@@ -26,6 +26,7 @@ public class AiDetectionService {
 
     private final AiDetectionRepository aiDetectionRepository;
     private final MissionRepository missionRepository;
+    private final com.iotserver.global.service.PlatformForwardingService platformForwardingService;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -107,6 +108,8 @@ public class AiDetectionService {
                 .detectedAt(dto.getDetectedAt())
                 .build();
 
-        return aiDetectionRepository.save(detection);
+        AiDetection saved = aiDetectionRepository.save(detection);
+        platformForwardingService.sendAiDetectionEvent(saved);
+        return saved;
     }
 }
