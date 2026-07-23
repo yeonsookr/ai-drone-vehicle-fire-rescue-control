@@ -111,3 +111,28 @@
 | `longitude` | Double | 감지 지점 경도 |
 | `image_url` | String | 원본 고화질 스냅샷 이미지 웹 접근 주소 |
 | `detected_at` | String | 탐지 발생 시각 (ISO-8601) |
+
+---
+
+## 4. 차량 목록 및 최신 위치/상태 조회 API (플랫폼 ➔ 관제 서버)
+
+플랫폼 백엔드가 관제 대시보드를 초기화하거나 등록된 차량 전체 목록 및 최신 위치를 조회할 때 관제 서버(8080)로 물어보는 엔드포인트입니다.
+
+*   **메서드 및 경로**: `GET /api/vehicles`
+*   **응답 Content-Type**: `application/json`
+
+### 📋 응답 페이로드 (Response Body JSON Array)
+```json
+[
+  {
+    "id": "V-01",
+    "name": "차량 1호기",
+    "status": "active",
+    "battery_level": 90.0,
+    "current_lat": 37.52812,
+    "current_lng": 127.02934,
+    "created_at": "2026-07-23T10:00:00.000",
+    "updated_at": "2026-07-23T13:30:00.000"
+  }
+]
+```
